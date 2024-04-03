@@ -17,6 +17,9 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
         private int turn;
         private int winrot;
         private int winblau;
+
+        SolidColorBrush backgroundcolor = (SolidColorBrush)new BrushConverter().ConvertFrom("#FFDDDDDD");
+
         Button pressedbutton;
 
         private List<Button> row1;
@@ -342,10 +345,10 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
         }
 
-        private void btntopleft_Click(object sender, RoutedEventArgs e)
+        private void btnclick(object sender, RoutedEventArgs e)
         {
             int win = 0;
-            pressedbutton = sender as Button;
+            pressedbutton = (Button)sender;
 
 
             if (turn % 2 == 0 && pressedbutton.Content == null)
@@ -374,316 +377,36 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             if (win == 2)
             {
                 winblau++;
-                tbkwino.Text = $"{winblau}    O";
+                tbkwinx.Text = $"X    {winblau}";
                 MessageBox.Show("Blau hat gewonnen");
             }
 
-        }
-
-        private void btntopmid_Click(object sender, RoutedEventArgs e)
-        {
-            int win = 0;
-            pressedbutton = e.Source as Button;
-
-
-            if (turn % 2 == 0 && pressedbutton.Content == null)
-            {
-                blueturn(pressedbutton);
-                turn++;
-                tbkturn.Background = new SolidColorBrush(Colors.Red);
-            }
-            else if (turn % 2 == 1 && pressedbutton.Content == null)
-            {
-                redturn(pressedbutton);
-                turn++;
-                tbkturn.Background = new SolidColorBrush(Colors.Blue);
-            }
-
-            win += checkforrowwin();
-            win += checkforcolumnwin();
-            win += checkfordiagonalwin();
-
-            if (win == 1)
-            {
-                winrot++;
-                tbkwino.Text = $"{winrot}    O";
-                MessageBox.Show("Rot hat gewonnen!");
-            }
-            if (win == 2)
-            {
-                winblau++;
-                tbkwino.Text = $"{winblau}    O";
-                MessageBox.Show("Blau hat gewonnen");
-            }
-        }
-
-        private void btntopright_Click(object sender, RoutedEventArgs e)
-        {
-            int win = 0;
-            pressedbutton = e.Source as Button;
-
-
-            if (turn % 2 == 0 && pressedbutton.Content == null)
-            {
-                blueturn(pressedbutton);
-                turn++;
-                tbkturn.Background = new SolidColorBrush(Colors.Red);
-            }
-            else if (turn % 2 == 1 && pressedbutton.Content == null)
-            {
-                redturn(pressedbutton);
-                turn++;
-                tbkturn.Background = new SolidColorBrush(Colors.Blue);
-            }
-
-            win += checkforrowwin();
-            win += checkforcolumnwin();
-            win += checkfordiagonalwin();
-
-            if (win == 1)
-            {
-                winrot++;
-                tbkwino.Text = $"{winrot}    O";
-                MessageBox.Show("Rot hat gewonnen!");
-            }
-            if (win == 2)
-            {
-                winblau++;
-                tbkwino.Text = $"{winblau}    O";
-                MessageBox.Show("Blau hat gewonnen");
-            }
-        }
-
-        private void btnmidleft_Click(object sender, RoutedEventArgs e)
-        {
-            int win = 0;
-            pressedbutton = e.Source as Button;
-
-
-            if (turn % 2 == 0 && pressedbutton.Content == null)
-            {
-                blueturn(pressedbutton);
-                turn++;
-                tbkturn.Background = new SolidColorBrush(Colors.Red);
-            }
-            else if (turn % 2 == 1 && pressedbutton.Content == null)
-            {
-                redturn(pressedbutton);
-                turn++;
-                tbkturn.Background = new SolidColorBrush(Colors.Blue);
-            }
-
-            win += checkforrowwin();
-            win += checkforcolumnwin();
-            win += checkfordiagonalwin();
-
-            if (win == 1)
-            {
-                winrot++;
-                tbkwino.Text = $"{winrot}    O";
-                MessageBox.Show("Rot hat gewonnen!");
-            }
-            if (win == 2)
-            {
-                winblau++;
-                tbkwino.Text = $"{winblau}    O";
-                MessageBox.Show("Blau hat gewonnen");
-            }
-        }
-
-        private void btnmidmid_Click(object sender, RoutedEventArgs e)
-        {
-            int win = 0;
-            pressedbutton = e.Source as Button;
-
-
-            if (turn % 2 == 0 && pressedbutton.Content == null)
-            {
-                blueturn(pressedbutton);
-                turn++;
-                tbkturn.Background = new SolidColorBrush(Colors.Red);
-            }
-            else if (turn % 2 == 1 && pressedbutton.Content == null)
-            {
-                redturn(pressedbutton);
-                turn++;
-                tbkturn.Background = new SolidColorBrush(Colors.Blue);
-            }
-
-            win += checkforrowwin();
-            win += checkforcolumnwin();
-            win += checkfordiagonalwin();
-
-            if (win == 1)
-            {
-                winrot++;
-                tbkwino.Text = $"{winrot}    O";
-                MessageBox.Show("Rot hat gewonnen!");
-            }
-            if (win == 2)
-            {
-                winblau++;
-                tbkwino.Text = $"{winblau}    O";
-                MessageBox.Show("Blau hat gewonnen");
-            }
-        }
-
-        private void btnmidright_Click(object sender, RoutedEventArgs e)
-        {
-            int win = 0;
-            pressedbutton = e.Source as Button;
-
-
-            if (turn % 2 == 0 && pressedbutton.Content == null)
-            {
-                blueturn(pressedbutton);
-                turn++;
-                tbkturn.Background = new SolidColorBrush(Colors.Red);
-            }
-            else if (turn % 2 == 1 && pressedbutton.Content == null)
-            {
-                redturn(pressedbutton);
-                turn++;
-                tbkturn.Background = new SolidColorBrush(Colors.Blue);
-            }
-
-            win += checkforrowwin();
-            win += checkforcolumnwin();
-            win += checkfordiagonalwin();
-
-            if (win == 1)
-            {
-                winrot++;
-                tbkwino.Text = $"{winrot}    O";
-                MessageBox.Show("Rot hat gewonnen!");
-            }
-            if (win == 2)
-            {
-                winblau++;
-                tbkwino.Text = $"{winblau}    O";
-                MessageBox.Show("Blau hat gewonnen");
-            }
-        }
-
-        private void btnbotleft_Click(object sender, RoutedEventArgs e)
-        {
-            int win = 0;
-            pressedbutton = e.Source as Button;
-
-
-            if (turn % 2 == 0 && pressedbutton.Content == null)
-            {
-                blueturn(pressedbutton);
-                turn++;
-                tbkturn.Background = new SolidColorBrush(Colors.Red);
-            }
-            else if (turn % 2 == 1 && pressedbutton.Content == null)
-            {
-                redturn(pressedbutton);
-                turn++;
-                tbkturn.Background = new SolidColorBrush(Colors.Blue);
-            }
-
-            win += checkforrowwin();
-            win += checkforcolumnwin();
-            win += checkfordiagonalwin();
-
-            if (win == 1)
-            {
-                winrot++;
-                tbkwino.Text = $"{winrot}    O";
-                MessageBox.Show("Rot hat gewonnen!");
-            }
-            if (win == 2)
-            {
-                winblau++;
-                tbkwino.Text = $"{winblau}    O";
-                MessageBox.Show("Blau hat gewonnen");
-            }
-        }
-
-        private void btnbotmid_Click(object sender, RoutedEventArgs e)
-        {
-            int win = 0;
-            pressedbutton = e.Source as Button;
-
-
-            if (turn % 2 == 0 && pressedbutton.Content == null)
-            {
-                blueturn(pressedbutton);
-                turn++;
-                tbkturn.Background = new SolidColorBrush(Colors.Red);
-            }
-            else if (turn % 2 == 1 && pressedbutton.Content == null)
-            {
-                redturn(pressedbutton);
-                turn++;
-                tbkturn.Background = new SolidColorBrush(Colors.Blue);
-            }
-
-            win += checkforrowwin();
-            win += checkforcolumnwin();
-            win += checkfordiagonalwin();
-
-            if (win == 1)
-            {
-                winrot++;
-                tbkwino.Text = $"{winrot}    O";
-                MessageBox.Show("Rot hat gewonnen!");
-            }
-            if (win == 2)
-            {
-                winblau++;
-                tbkwino.Text = $"{winblau}    O";
-                MessageBox.Show("Blau hat gewonnen");
-            }
-        }
-
-        private void btnbotright_Click(object sender, RoutedEventArgs e)
-        {
-            int win = 0;
-            pressedbutton = e.Source as Button;
-
-
-            if (turn % 2 == 0 && pressedbutton.Content == null)
-            {
-                blueturn(pressedbutton);
-                turn++;
-                tbkturn.Background = new SolidColorBrush(Colors.Red);
-            }
-            else if (turn % 2 == 1 && pressedbutton.Content == null)
-            {
-                redturn(pressedbutton);
-                turn++;
-                tbkturn.Background = new SolidColorBrush(Colors.Blue);
-            }
-
-            win += checkforrowwin();
-            win += checkforcolumnwin();
-            win += checkfordiagonalwin();
-
-            if (win == 1)
-            {
-                winrot++;
-                tbkwino.Text = $"{winrot}    O";
-                MessageBox.Show("Rot hat gewonnen!");
-            }
-            if (win == 2)
-            {
-                winblau++;
-                tbkwino.Text = $"{winblau}    O";
-                MessageBox.Show("Blau hat gewonnen");
-            }
         }
 
 
         private void btnnewgame_Click(object sender, RoutedEventArgs e)
         {
+            tbkturn.Background = new SolidColorBrush(Colors.Blue);
+
             foreach (Button btn in row1)
             {
-                btn.Background = new SolidColorBrush();
+                btn.Background = backgroundcolor;
+                btn.Content = null;
             }
+            foreach (Button btn in row2)
+            {
+                btn.Background = backgroundcolor;
+                btn.Content = null;
+            }
+            foreach (Button btn in row3)
+            {
+                btn.Background = backgroundcolor;
+                btn.Content = null;
+            }
+
+            turn = 0;
         }
 
+        
     }
 }
