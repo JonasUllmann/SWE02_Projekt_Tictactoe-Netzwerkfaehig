@@ -35,7 +35,7 @@
         <Button x:Name="btntopright" Grid.Row="1" Grid.Column="2" Margin="10,10,10,10" Click="btnclick" FontSize="48"/>
         <Button x:Name="btntopmid" Grid.Row="1" Grid.Column="1" Margin="10,10,9,10" Click="btnclick" FontSize="48"/>
         <Button x:Name="btnbotright" Grid.Row="3" Grid.Column="2" Margin="10,10,10,10" Click="btnclick" FontSize="48"/>
-        <Button x:Name="btnnewgame" Content="Neues Spiel" Margin="10,5,10,4" Grid.Row="4" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="3" Width="NaN" Background="#FF13FF00" Click="btnnewgame_Click"/>
+        <Button x:Name="btnnewgame" Content="Neues Spiel" Margin="10,5,10,4" Grid.Row="4" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="3" Width="NaN" Background="#FF13FF00" Click="btnnewgame_Click" FontStyle="Italic"/>
         <TextBlock x:Name="tbkturn" Margin="22,14,21,13" TextWrapping="Wrap" TextAlignment="Center" RenderTransformOrigin="1.261,0.441" Foreground="Black" FontWeight="Bold" FontSize="16" Grid.Column="1">
             <TextBlock.Background>
                 <SolidColorBrush Color="Blue" Opacity="1"/>
