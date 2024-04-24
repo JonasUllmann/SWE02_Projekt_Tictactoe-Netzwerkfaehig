@@ -27,7 +27,9 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
         SolidColorBrush backgroundcolor = (SolidColorBrush)new BrushConverter().ConvertFrom("#FFDDDDDD");   //Standardfarbe der Buttons in XAML, wichtig für richtige Farbe nach Reset
 
         Button pressedbutton;   //der gedrückte Button
-
+        //#FFDDDDDD
+        //MainWindow main1 = new MainWindow(); //erstellt Mainwindowobjekt -> Zugriff auf 
+        
         //Button-Reihen
         private List<Button> row1;
         private List<Button> row2;
@@ -42,6 +44,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
         private List<Button> diagonal1;
         private List<Button> diagonal2;
 
+        
 
         public Window1()
         {

@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34723.18
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SWE02_Projekt_Tictactoe-Netzwerkfaehig", "SWE02_Projekt_Tictactoe-Netzwerkfaehig\SWE02_Projekt_Tictactoe-Netzwerkfaehig.csproj", "{A1311B5A-084F-46F5-BDD0-FF60C5E2712F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SWE02_Projekt_Tictactoe-Netzwerkfaehig", "SWE02_Projekt_Tictactoe-Netzwerkfaehig\SWE02_Projekt_Tictactoe-Netzwerkfaehig.csproj", "{A1311B5A-084F-46F5-BDD0-FF60C5E2712F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Projektserver", "Projektserver\Projektserver.csproj", "{EE5C64A6-58FD-42F8-A319-003BF3AFF8E2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{A1311B5A-084F-46F5-BDD0-FF60C5E2712F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A1311B5A-084F-46F5-BDD0-FF60C5E2712F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A1311B5A-084F-46F5-BDD0-FF60C5E2712F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE5C64A6-58FD-42F8-A319-003BF3AFF8E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE5C64A6-58FD-42F8-A319-003BF3AFF8E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE5C64A6-58FD-42F8-A319-003BF3AFF8E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE5C64A6-58FD-42F8-A319-003BF3AFF8E2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
