@@ -18,11 +18,19 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
     {
         Window1 win1 = new Window1();
 
+        public MainWindow()
+        {
+            InitializeComponent();
+        }
+
         private string ip;
+        private string pname;
         private int port;
+
 
         public string Ip { get => ip; set => ip = value; }
         public int Port { get => port; set => port = value; }
+        public string Pname { get => pname; set => pname = value; }
 
         private void btn_start_Click(object sender, RoutedEventArgs e) //zeigt das Fenster mit Tictactoe und schließt das erste
         {
@@ -30,21 +38,24 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             win1.Show();
 
             this.Close();
+            
+            
         }
 
         private void btn_connect_Click(object sender, RoutedEventArgs e)
         {
-            ip = tbxip.Text;
-            port = Convert.ToInt32(tbxport.Text);
+            this.Ip = tbxip.Text;
+            this.Port = Convert.ToInt32(tbxport.Text);
+            this.Pname = tbxname.Text;
 
             IPEndPoint serverendpoint = new IPEndPoint(IPAddress.Parse(ip), port);
 
             Socket clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             
             clientSocket.Connect(serverendpoint);
-            Console.WriteLine("Socket connected to -> {0} ",
-              serverendpoint.ToString());
 
+
+            
         }
 
     }

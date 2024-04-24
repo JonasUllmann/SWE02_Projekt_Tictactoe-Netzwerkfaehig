@@ -1,23 +1,20 @@
-﻿using System;
+﻿using System.Net.Sockets;
 using System.Net;
-using System.Net.Sockets;
 using System.Text;
+using System.Xml;
 
 namespace Projektserver
 {
-    internal class Program
+    class Program
     {
+        // Main Method
         static void Main(string[] args)
         {
-            int serverPort = FindAvailablePort();
-            Console.WriteLine($"Selected server port: {serverPort}");
+            Console.Title = "Socket Server";
 
-            IPHostEntry iphost = Dns.GetHostEntry(Dns.GetHostName());
+            IPHostEntry hostEntry = Dns.GetHostByName(Dns.GetHostName());
+            Console.WriteLine(hostEntry.AddressList[2]);
 
-            foreach (var i in iphost.AddressList)
-            {
-                Console.WriteLine(i.ToString());
-            }
 
             Console.WriteLine("Listening for messages...");
 
@@ -26,62 +23,37 @@ namespace Projektserver
                 SocketType.Stream,
                 ProtocolType.Tcp);
 
-            IPAddress serverIP = IPAddress.Any;
-            IPEndPoint serverEP = new IPEndPoint(serverIP, serverPort);
 
-            try
+            IPAddress serverIP = IPAddress.Any;
+            IPEndPoint serverEP = new IPEndPoint(serverIP, 33367);
+
+            serverSock.Bind(serverEP);
+            /*try
             {
                 serverSock.Bind(serverEP);
             }
             catch (System.Net.Sockets.SocketException sockEx)
             {
-                int errorCode = sockEx.ErrorCode;
-            }
-
+                int errcode = sockEx.ErrorCode;
+                Console.WriteLine(errcode);
+            }*/
             serverSock.Listen(10);
 
             while (true)
             {
                 Socket connection = serverSock.Accept();
 
-                Byte[] serverBuffer = new Byte[8];
+                Byte[] serverBuffer = new Byte[1024];
                 String message = String.Empty;
 
+                int bytes = connection.Receive(serverBuffer, serverBuffer.Length, 0);
+
+                message += Encoding.UTF8.GetString(serverBuffer, 0, bytes);
+
                 Console.WriteLine(message);
+
                 connection.Close();
             }
-        }
-
-        static int FindAvailablePort()
-        {
-            // Starte bei einem zufälligen Port und prüfe, ob er verfügbar ist
-            Random rand = new Random();
-            int port = rand.Next(1024, 65535);
-
-            while (!IsPortAvailable(port))
-            {
-                port = rand.Next(1024, 65535);
-            }
-
-            return port;
-        }
-
-        static bool IsPortAvailable(int port)
-        {
-            bool isAvailable = true;
-            try
-            {
-                // Versuche, einen Listener auf dem Port zu binden
-                TcpListener listener = new TcpListener(IPAddress.Any, port);
-                listener.Start();
-                listener.Stop();
-            }
-            catch
-            {
-                // Wenn eine Exception ausgelöst wird, ist der Port nicht verfügbar
-                isAvailable = false;
-            }
-            return isAvailable;
         }
     }
 }
