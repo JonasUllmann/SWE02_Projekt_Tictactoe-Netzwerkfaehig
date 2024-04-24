@@ -55,8 +55,18 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             clientSocket.Connect(serverendpoint);
 
 
-            
+           btn_start.IsEnabled = true;
         }
 
+        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            btn_connect.IsEnabled = false;
+            tbxip.IsEnabled = false;
+            tbxname.IsEnabled = false;
+            tbxport.IsEnabled = false;
+
+            btn_start.IsEnabled = true;
+
+        }
     }
 }

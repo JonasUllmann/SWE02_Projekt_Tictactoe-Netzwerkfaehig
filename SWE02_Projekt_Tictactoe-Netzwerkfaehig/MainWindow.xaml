@@ -9,13 +9,14 @@
         Title="MainWindow" Height="400" Width="450">
     <Grid>
         <Button x:Name="btn_connect" Content="Connect" HorizontalAlignment="Center" Margin="0,269,0,0" VerticalAlignment="Top" Height="33" Width="82" Click="btn_connect_Click"/>
-        <Button x:Name="btn_start" Content="Start Game" HorizontalAlignment="Center" Margin="0,322,0,0" VerticalAlignment="Top" Height="52" Width="82" Click="btn_start_Click" RenderTransformOrigin="0.456,1.189"/>
+        <Button x:Name="btn_start" Content="Start Game" HorizontalAlignment="Center" Margin="0,322,0,0" VerticalAlignment="Top" Height="52" Width="82" Click="btn_start_Click" RenderTransformOrigin="0.456,1.189" IsEnabled="False"/>
         <TextBlock HorizontalAlignment="Center" Margin="0,28,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="16" Width="128" TextAlignment="Center"><Run Language="de-de" Text="IP-Adresse:"/></TextBlock>
         <TextBox x:Name="tbxip" HorizontalAlignment="Center" Margin="0,49,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="128" TextAlignment="Center"/>
         <TextBlock HorizontalAlignment="Center" Margin="0,82,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="16" Width="128" TextAlignment="Center"><Run Language="de-de" Text="Port"/><Run Text=":"/></TextBlock>
         <TextBox x:Name="tbxport" HorizontalAlignment="Center" Margin="0,103,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="82" TextAlignment="Center"/>
         <TextBox x:Name="tbxname" HorizontalAlignment="Center" Margin="0,156,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="128" TextAlignment="Center"/>
         <TextBlock HorizontalAlignment="Center" Margin="0,135,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="16" Width="128" TextAlignment="Center" Text="Name:"/>
+        <CheckBox Content="Lokal spielen" HorizontalAlignment="Left" Margin="10,32,0,0" VerticalAlignment="Top" Width="109" Checked="CheckBox_Checked"/>
 
 
     </Grid>
