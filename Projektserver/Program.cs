@@ -3,17 +3,24 @@ using System.Net;
 using System.Text;
 using System.Xml;
 
-namespace Projektserver
+namespace server
 {
     class Program
     {
+
         // Main Method
         static void Main(string[] args)
         {
             Console.Title = "Socket Server";
 
-            IPHostEntry hostEntry = Dns.GetHostByName(Dns.GetHostName());
-            Console.WriteLine(hostEntry.AddressList[2]);
+            IPHostEntry hostEntry = Dns.GetHostEntry(Dns.GetHostName());
+
+
+
+            foreach (IPAddress i in hostEntry.AddressList)
+            {
+                Console.WriteLine(i);
+            }
 
 
             Console.WriteLine("Listening for messages...");
@@ -25,11 +32,11 @@ namespace Projektserver
 
 
             IPAddress serverIP = IPAddress.Any;
-            IPEndPoint serverEP = new IPEndPoint(serverIP, 33367);
+            IPEndPoint serverEP = new IPEndPoint(serverIP, 11111);
 
             serverSock.Bind(serverEP);
             /*try
-            {
+          
                 serverSock.Bind(serverEP);
             }
             catch (System.Net.Sockets.SocketException sockEx)

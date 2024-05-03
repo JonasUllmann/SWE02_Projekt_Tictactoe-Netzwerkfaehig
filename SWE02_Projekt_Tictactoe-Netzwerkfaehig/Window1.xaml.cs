@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -19,6 +20,8 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
     /// </summary>
     public partial class Window1 : Window
     {
+        //((MainWindow)Application.Current.MainWindow) -> Zugriff auf Mainwindow
+
 
         private int turn;   //Zählt die Anzahl der Züge, von dieser Variable abhängig wer gerade drann ist
         private int winrot;     //Zählt die Anzahl für gewonnene Runden von Rot
@@ -27,9 +30,12 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
         SolidColorBrush backgroundcolor = (SolidColorBrush)new BrushConverter().ConvertFrom("#FFDDDDDD");   //Standardfarbe der Buttons in XAML, wichtig für richtige Farbe nach Reset
 
         Button pressedbutton;   //der gedrückte Button
-        //#FFDDDDDD
-        //MainWindow main1 = new MainWindow(); //erstellt Mainwindowobjekt -> Zugriff auf 
+
+        //MainWindow m1 = new MainWindow(); //erstellt Mainwindowobjekt -> Zugriff auf ip port usw.
         
+        
+        
+
         //Button-Reihen
         private List<Button> row1;
         private List<Button> row2;
@@ -49,6 +55,8 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
         public Window1()
         {
             InitializeComponent();
+
+            
 
             turn = 0;
             winrot = 0;
@@ -396,7 +404,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             pressedbutton.Content = "O";    //Content bei Rot immer O
             pressedbutton.Background = new SolidColorBrush(Colors.Red);     //Farbe Rot
 
-
+            
         }
 
         private void blueturn(Button pressedbutton) //Blau ist am Zug
@@ -430,27 +438,33 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
                 tbkturn.Background = new SolidColorBrush(Colors.Blue);   //Anzeige wer jetzt an der Reihe ist wird entsprechend geändert
             }
 
+
+            //Prüfen ob ein Spieler in diesem Zug gewonnen hat
             win += checkforrowwin();
-            win += checkforcolumnwin();
+            win += checkforcolumnwin();     
             win += checkfordiagonalwin();
 
+            //Rot hat gewonnen
             if (win == 1)
             {
                 lockbuttons();
+                btnnewgame.IsEnabled = true; //entsperrt Reset-button
                 winrot++;
                 tbkwino.Text = $"{winrot}    O";
                 MessageBox.Show("Rot hat gewonnen!");
             }
+            //Blau hat gewonnen
             if (win == 2)
             {
                 lockbuttons();
+                btnnewgame.IsEnabled = true; //entsperrt Reset-button
                 winblau++;
                 tbkwinx.Text = $"X    {winblau}";
                 MessageBox.Show("Blau hat gewonnen");
             }
 
         }
-
+        
 
         private void btnnewgame_Click(object sender, RoutedEventArgs e) //Funktion des Reset Buttons, setzt das spielfeld wieder auf standard zurück
         {
@@ -475,8 +489,13 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             }
 
             unlockbuttons();
+            btnnewgame.IsEnabled = false;
             turn = 0;   //turn zurück auf null gestellt 
         }
 
+        private void btnclose_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
     }
 }
