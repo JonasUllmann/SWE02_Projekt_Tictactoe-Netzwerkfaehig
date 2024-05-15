@@ -29,7 +29,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
         public Socket ClientSocket { get => clientSocket; set => clientSocket = value; }
         public IPEndPoint Serverendpoint { get => serverendpoint; set => serverendpoint = value; }
 
-        private void btn_start_Click(object sender, RoutedEventArgs e) //zeigt das Fenster mit Tictactoe und schließt das erste
+        private void btn_start_Click(object sender, RoutedEventArgs e) //zeigt das Fenster mit Tictactoe und versteckt das erste
         {
             win1.Show();
             this.Hide();
@@ -37,16 +37,28 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
         private void btn_connect_Click(object sender, RoutedEventArgs e)
         {
+            //Überträgt die nötigen Parameter aus den Textboxen in Variablen
             this.Ip = tbxip.Text;
             this.Port = Convert.ToInt32(tbxport.Text);
             this.Pname = tbxname.Text;
 
+            //Erstellt Endpoint und Socket
             serverendpoint = new IPEndPoint(IPAddress.Parse(ip), port);
             clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
+            //Versucht eine Verbindung aufzubauen
             clientSocket.Connect(serverendpoint);
             clientSocket.Send(Encoding.UTF8.GetBytes(pname));
 
+
+            Byte[] serverBuffer = new Byte[1024];
+            String message = String.Empty;
+
+            int bytes = clientSocket.Receive(serverBuffer, serverBuffer.Length, 0);
+
+            message += Encoding.UTF8.GetString(serverBuffer, 0, bytes);
+
+           tbxname.Text = message;
 
 
             btn_start.IsEnabled = true;
@@ -71,6 +83,15 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             tbxport.IsEnabled = true;
 
             btn_start.IsEnabled = false;
+        }
+
+        private void Test_Checked(object sender, RoutedEventArgs e)
+        {
+            tbxname.Text = "Test";
+            tbxip.Text = "127.0.0.1";
+            tbxport.Text = "11111";
+
+
         }
     }
 }

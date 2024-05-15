@@ -43,7 +43,7 @@ namespace server
                int errcode = sockEx.ErrorCode;
                Console.WriteLine(errcode);
            }*/
-            serverSock.Listen(10);
+            serverSock.Listen(2);
 
             while (true)
             {

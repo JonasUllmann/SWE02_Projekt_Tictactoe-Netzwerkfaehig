@@ -21,6 +21,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
     public partial class Window1 : Window
     {
         //((MainWindow)Application.Current.MainWindow) -> Zugriff auf Mainwindow
+        //private MainWindow m1;
 
 
         private int turn;   //Zählt die Anzahl der Züge, von dieser Variable abhängig wer gerade drann ist
@@ -50,7 +51,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
         private List<Button> diagonal1;
         private List<Button> diagonal2;
 
-        
+        public MainWindow M1 { get => m1; set => m1 = value; }
 
         public Window1()
         {
@@ -496,6 +497,12 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
         private void btnclose_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+            
+            
+            
+            //btnmidmid.Content = M1.Port.ToString();
+
+
         }
     }
 }
