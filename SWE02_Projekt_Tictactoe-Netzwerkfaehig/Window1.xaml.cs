@@ -27,8 +27,10 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
         private MainWindow m1;
         private Window2 win2;
 
+        //Spieler
         public Player player;
         public Player player2;
+
         //Button-Reihen
         private List<Button> row1;
         private List<Button> row2;
@@ -106,10 +108,12 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             player = new Player(m1.Pteam, 0, m1.Pname);
             player2 = new Player("", 0, "");
 
+            //erwartet Spielernamen des remotespielers vom Server
             Byte[] serverBuffer = new Byte[1024];
             int bytes = m1.ClientSocket.Receive(serverBuffer, serverBuffer.Length, 0);
             player2.Name = Encoding.UTF8.GetString(serverBuffer, 0, bytes);
 
+            //Beschreibt die Spiel-UI und startet den gameloop
             if (player.Team == "O")
             {
                 player2.Team = "X";
@@ -128,10 +132,6 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
                 tbkwinx.Text = $"{player.Name}  {player.Wins}";
 
             }
-
-
-
-
         }
 
         private void gameloop()
@@ -153,6 +153,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
                 lockbuttons();
                 btnnewgame.IsEnabled = true; //entsperrt Reset-button
 
+                //aktualisiert Spiel-UI
                 if (player.Team == "O")
                 {
                     player.Wins++;
@@ -172,6 +173,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
                 lockbuttons();
                 btnnewgame.IsEnabled = true; //entsperrt Reset-button
 
+                //aktualisiert Spiel-UI
                 if (player.Team == "X")
                 {
                     player.Wins++;
@@ -202,6 +204,8 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             string p2turn = "";
 
             //erwartet string im Format: ("{Reihe}{btn}")
+                                       //a, b oder c stehen für Reihe 1, 2 oder 3
+                                       //0, 1 oder 2 stehen für den Index innerhalb der jeweiligen Liste und somit für die Buttons
             int bytes = m1.ClientSocket.Receive(serverBuffer, serverBuffer.Length, 0);
             p2turn += Encoding.UTF8.GetString(serverBuffer, 0, bytes);
 
@@ -235,9 +239,9 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
                     redturn(row3[p2turn[1]]);
                 }
             }
-
+            //player ist als nächstes an der Reihe
             turn = 0;
-
+            //Rückkehr zur gameloop funktion
             gameloop();
         }
 
@@ -538,22 +542,23 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
         {
             pressedbutton.Content = "O";    //Content bei Rot immer O
             pressedbutton.Background = new SolidColorBrush(Colors.Red);     //Farbe Rot
-
-
         }
 
         private void blueturn(Button pressedbutton) //Blau ist am Zug
         {
             pressedbutton.Content = "X";    //Content bei Blau immer X
             pressedbutton.Background = new SolidColorBrush(Colors.Blue);    //Farbe Blau
-
-
         }
 
+        //erstellt string in dem Format wie er ihn dem Server weiterschickt
         private string genbtnstring(string name)
         {
             string btnstring = "";
 
+            //a, b oder c stehen für Reihe 1, 2 oder 3
+            //0, 1 oder 2 stehen für den Index innerhalb der jeweiligen Liste und somit für die Buttons
+            
+            
             if (name[3] == 't')
             {
                 if (name[6] == 'l')
@@ -607,7 +612,6 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
         {
             pressedbutton = (Button)sender; //Funktion wird ausgelöst, egal welcher der 9 Buttons gedrückt wird, gibt an welcher der 9 es war
             
-
             if (pressedbutton.Content == null) //ist der Wert von turn gerade ist Blau an der Reihe
             {
                 if (player.Team == "X")
@@ -626,9 +630,12 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
             string pturn = genbtnstring(pressedbutton.Name);
 
-            //erwartet string im Format: ("{Reihe}{btn}")
+            //sendet string im Format: ("{Reihe}{btn}")
             m1.ClientSocket.Send(Encoding.UTF8.GetBytes(pturn));
+
+            //player2 ist als nächstes an der Reihe
             turn = 1;
+            //Rückkehr zum gameloop
             gameloop();
         }
 
@@ -675,7 +682,6 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
         private string team;
         private int wins;
         private string name;
-        private int wincheck;
 
         public Player(string team, int wins, string name)
         {
