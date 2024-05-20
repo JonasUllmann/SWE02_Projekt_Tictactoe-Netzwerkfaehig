@@ -1,20 +1,19 @@
-﻿using System.Text;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 {
     /// <summary>
-    /// Interaktionslogik für Window1.xaml
+    /// Interaktionslogik für Window2.xaml
     /// </summary>
-    public partial class Window1 : Window
+    public partial class Window2 : Window
     {
         //((MainWindow)Application.Current.MainWindow) -> Zugriff auf Mainwindow
         //private MainWindow m1;
 
 
-        private int turn;   //Gíbt an wer als nächstes am Zug ist 0->player, 1->player2
+        private int turn;   //Zählt die Anzahl der Züge, von dieser Variable abhängig wer gerade drann ist
         private int winrot;     //Zählt die Anzahl für gewonnene Runden von Rot
         private int winblau;    //Zählt die Anzahl für gewonnene Runden von Blau
 
@@ -22,13 +21,10 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
         Button pressedbutton;   //der gedrückte Button
 
-        //MainWindow m1 = new MainWindow(); //erstellt Mainwindowobjekt -> Zugriff auf ip port usw.
+        private MainWindow m1; //erstellt Mainwindowobjekt
+        private Window1 win1;
 
-        private MainWindow m1;
-        private Window2 win2;
 
-        public Player player;
-        public Player player2;
         //Button-Reihen
         private List<Button> row1;
         private List<Button> row2;
@@ -43,13 +39,11 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
         private List<Button> diagonal1;
         private List<Button> diagonal2;
 
-        public Window1(MainWindow m1, Window2 win2)
+        public Window2(MainWindow m1)
         {
             InitializeComponent();
             this.m1 = m1;
-            this.win2 = win2;
 
-            this.m1.gamestart += gamestart;
 
             turn = 0;
             winrot = 0;
@@ -100,146 +94,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
         }
 
 
-        private void gamestart(object sender, EventArgs e)
-        {
 
-            player = new Player(m1.Pteam, 0, m1.Pname);
-            player2 = new Player("", 0, "");
-
-            Byte[] serverBuffer = new Byte[1024];
-            int bytes = m1.ClientSocket.Receive(serverBuffer, serverBuffer.Length, 0);
-            player2.Name = Encoding.UTF8.GetString(serverBuffer, 0, bytes);
-
-            if (player.Team == "O")
-            {
-                player2.Team = "X";
-                tbkwinx.Text = $"{player2.Name}  {player2.Wins}";
-
-                tbkwino.Text = $"{player.Wins}  {player.Name}";
-
-                player2turn();
-                
-            }
-            else if (player.Team == "X")
-            {
-                player2.Team = "O";
-                tbkwino.Text = $"{player2.Wins}  {player2.Name}";
-
-                tbkwinx.Text = $"{player.Name}  {player.Wins}";
-
-            }
-
-
-
-
-        }
-
-        private void gameloop()
-        {
-            lockbuttons();
-            int win = 0;    //erhält die return Werte der Gewinn-funktionen
-                            //return 0 -> keiner hat in diesem Zug gewonnen
-                            //return 1 -> Rot, also O hat gewonnen
-                            //return 2 -> Blau, also X hat gewonnen
-
-            //Prüfen ob ein Spieler in diesem Zug gewonnen hat
-            win += checkforrowwin();
-            win += checkforcolumnwin();
-            win += checkfordiagonalwin();
-
-            //Rot hat gewonnen
-            if (win == 1)
-            {
-                lockbuttons();
-                btnnewgame.IsEnabled = true; //entsperrt Reset-button
-
-                if (player.Team == "O")
-                {
-                    player.Wins++;
-                    tbkwino.Text = $"{player.Wins}  {player.Name}";
-
-                }
-                else if (player2.Team == "O")
-                {
-                    player2.Wins++;
-                    tbkwino.Text = $"{player2.Wins}  {player2.Name}";
-                }
-
-            }
-            //Blau hat gewonnen
-            else if (win == 2)
-            {
-                lockbuttons();
-                btnnewgame.IsEnabled = true; //entsperrt Reset-button
-
-                if (player.Team == "X")
-                {
-                    player.Wins++;
-                    tbkwinx.Text = $"{player.Name}  {player.Wins}";
-
-                }
-                else if (player2.Team == "X")
-                {
-                    player2.Wins++;
-                    tbkwinx.Text = $"{player2.Name}  {player2.Wins}";
-                }
-            }
-
-            if (turn == 0)
-            {
-                unlockbuttons();
-            }
-            else if (turn == 1)
-            {
-                player2turn();
-            }
-
-        }
-
-        private void player2turn()
-        {
-            Byte[] serverBuffer = new Byte[1024];
-            string p2turn = "";
-
-            //erwartet string im Format: ("{Reihe}{btn}")
-            int bytes = m1.ClientSocket.Receive(serverBuffer, serverBuffer.Length, 0);
-            p2turn += Encoding.UTF8.GetString(serverBuffer, 0, bytes);
-
-            if (player2.Team == "X")
-            {
-                if (p2turn[0] == 'a')
-                {
-                    blueturn(row1[p2turn[1]]);
-                }
-                else if (p2turn[0] == 'b')
-                {
-                    blueturn(row2[p2turn[1]]);
-                }
-                else if (p2turn[0] == 'c')
-                {
-                    blueturn(row3[p2turn[1]]);
-                }
-            }
-            else if (player2.Team == "O")
-            {
-                if (p2turn[0] == 'a')
-                {
-                    redturn(row1[p2turn[1]]);
-                }
-                else if (p2turn[0] == 'b')
-                {
-                    redturn(row2[p2turn[1]]);
-                }
-                else if (p2turn[0] == 'c')
-                {
-                    redturn(row3[p2turn[1]]);
-                }
-            }
-
-            turn = 0;
-
-            gameloop();
-        }
 
         private int checkforrowwin()
         {
@@ -550,86 +405,56 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
         }
 
-        private string genbtnstring(string name)
-        {
-            string btnstring = "";
-
-            if (name[3] == 't')
-            {
-                if (name[6] == 'l')
-                {
-                    btnstring = "a0";
-                }
-                else if (name[6] == 'm')
-                {
-                    btnstring = "a1";
-                }
-                else if (name[6] == 'r')
-                {
-                    btnstring = "a2";
-                }
-
-            }
-            else if (name[3] == 'm')
-            {
-                if (name[6] == 'l')
-                {
-                    btnstring = "b0";
-                }
-                else if (name[6] == 'm')
-                {
-                    btnstring = "b1";
-                }
-                else if (name[6] == 'r')
-                {
-                    btnstring = "b2";
-                }
-            }
-            else if (name[3] == 'b')
-            {
-                if (name[6] == 'l')
-                {
-                    btnstring = "c0";
-                }
-                else if (name[6] == 'm')
-                {
-                    btnstring = "c1";
-                }
-                else if (name[6] == 'r')
-                {
-                    btnstring = "c2";
-                }
-            }
-            return btnstring;
-        }
-
         private void btnclick(object sender, RoutedEventArgs e) //Funktion löst wenn einer der 9 Hauptbuttons gedrückt wird
         {
-            pressedbutton = (Button)sender; //Funktion wird ausgelöst, egal welcher der 9 Buttons gedrückt wird, gibt an welcher der 9 es war
-            
+            int win = 0;    //erhält die return Werte der Gewinn-funktionen
+                            //return 0 -> keiner hat in diesem Zug gewonnen
+                            //return 1 -> Rot, also O hat gewonnen
+                            //return 2 -> Blau, also X hat gewonnen
 
-            if (pressedbutton.Content == null) //ist der Wert von turn gerade ist Blau an der Reihe
+            pressedbutton = (Button)sender; //Funktion wird ausgelöst, egal welcher der 9 Buttons gedrückt wird, gibt an welcher der 9 es war
+
+
+            if (turn % 2 == 0 && pressedbutton.Content == null) //ist der Wert von turn gerade ist Blau an der Reihe
             {
-                if (player.Team == "X")
-                {
-                    blueturn(pressedbutton); //der gedrückte Button wird in der entsprechenden Farbe markiert und der Content wird geändert
-                    turn++;
-                    tbkturn.Background = new SolidColorBrush(Colors.Red);   //Anzeige wer jetzt an der Reihe ist wird entsprechend geändert
-                }
-                else if (player.Team == "O")
-                {
-                    redturn(pressedbutton); //der gedrückte Button wird in der entsprechenden Farbe markiert und der Content wird geändert
-                    turn++;
-                    tbkturn.Background = new SolidColorBrush(Colors.Blue);   //Anzeige wer jetzt an der Reihe ist wird entsprechend geändert
-                }
+                blueturn(pressedbutton); //der gedrückte Button wird in der entsprechenden Farbe markiert und der Content wird geändert
+                turn++;
+                tbkturn.Background = new SolidColorBrush(Colors.Red);   //Anzeige wer jetzt an der Reihe ist wird entsprechend geändert
+
+
+            }
+            else if (turn % 2 == 1 && pressedbutton.Content == null)    //ist der Wert von turn gerade ist Rot an der Reihe
+            {
+                redturn(pressedbutton); //der gedrückte Button wird in der entsprechenden Farbe markiert und der Content wird geändert
+                turn++;
+                tbkturn.Background = new SolidColorBrush(Colors.Blue);   //Anzeige wer jetzt an der Reihe ist wird entsprechend geändert
             }
 
-            string pturn = genbtnstring(pressedbutton.Name);
 
-            //erwartet string im Format: ("{Reihe}{btn}")
-            m1.ClientSocket.Send(Encoding.UTF8.GetBytes(pturn));
-            turn = 1;
-            gameloop();
+            //Prüfen ob ein Spieler in diesem Zug gewonnen hat
+            win += checkforrowwin();
+            win += checkforcolumnwin();
+            win += checkfordiagonalwin();
+
+            //Rot hat gewonnen
+            if (win == 1)
+            {
+                lockbuttons();
+                btnnewgame.IsEnabled = true; //entsperrt Reset-button
+                winrot++;
+                tbkwino.Text = $"{winrot}    O";
+                MessageBox.Show("Rot hat gewonnen!");
+            }
+            //Blau hat gewonnen
+            if (win == 2)
+            {
+                lockbuttons();
+                btnnewgame.IsEnabled = true; //entsperrt Reset-button
+                winblau++;
+                tbkwinx.Text = $"X    {winblau}";
+                MessageBox.Show("Blau hat gewonnen");
+            }
+
         }
 
 
@@ -662,31 +487,10 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
         private void btnclose_Click(object sender, RoutedEventArgs e)
         {
-            m1.ClientSocket.Close();
-            Environment.Exit(0);
+            Environment.Exit(0);        
         }
 
 
-    }
-
-    public class Player
-    {
-
-        private string team;
-        private int wins;
-        private string name;
-        private int wincheck;
-
-        public Player(string team, int wins, string name)
-        {
-            this.team = team;
-            this.wins = wins;
-            this.name = name;
-        }
-
-        public string Team { get => team; set => team = value; }
-        public int Wins { get => wins; set => wins = value; }
-        public string Name { get => name; set => name = value; }
     }
 
 }

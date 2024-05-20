@@ -1,9 +1,6 @@
-﻿using System;
-using System.Linq.Expressions;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
 
 namespace server
 {
@@ -11,7 +8,7 @@ namespace server
     {
         private static Semaphore semaphore = new Semaphore(1, 1); // Semaphore mit Anfangswert 1
         private static string symbol = ""; // Variable für das Symbol
-       
+
 
         // Main Method 
         static void Main(string[] args)
@@ -101,7 +98,7 @@ namespace server
 
                 }
 
-                
+
             }
         }
     }

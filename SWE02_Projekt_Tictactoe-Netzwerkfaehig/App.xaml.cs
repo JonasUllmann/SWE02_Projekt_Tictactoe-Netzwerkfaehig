@@ -1,6 +1,4 @@
-﻿using System.Configuration;
-using System.Data;
-using System.Windows;
+﻿using System.Windows;
 
 namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 {
