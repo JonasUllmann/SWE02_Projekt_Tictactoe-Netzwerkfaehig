@@ -1,105 +1,193 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 
-namespace server
+class TicTacToeServer
 {
-    class Program
+    static void Main(string[] args)
     {
-        private static Semaphore semaphore = new Semaphore(1, 1); // Semaphore mit Anfangswert 1
-        private static string symbol = ""; // Variable für das Symbol
+        StartServer();
+    }
 
+    static void StartServer()
+    {
+        // Definiere die IP-Adresse und den Port, auf dem der Server lauschen soll
+        IPAddress ipAddress = IPAddress.Any; // Lauscht auf allen verfügbaren IP-Adressen des Hosts
+        int port = 11111; // Der gleiche Port wie im Clientcode
 
-        // Main Method 
-        static void Main(string[] args)
+        // Erstelle einen TCP-Listener
+        TcpListener listener = new TcpListener(ipAddress, port);
+
+        try
         {
-            int concounter = 0;
+            // Beginne mit dem Lauschen auf Verbindungen von Clients
+            listener.Start();
+            Console.WriteLine("Tic Tac Toe Server gestartet. Warte auf Verbindungen...");
 
+            // Warte auf Verbindung des ersten Spielers
+            TcpClient player1Client = listener.AcceptTcpClient();
+            Console.WriteLine("Spieler 1 verbunden.");
 
-            Console.Title = "Socket Server";
+            // Warte auf Verbindung des zweiten Spielers
+            TcpClient player2Client = listener.AcceptTcpClient();
+            Console.WriteLine("Spieler 2 verbunden.");
 
-            IPHostEntry hostEntry = Dns.GetHostEntry(Dns.GetHostName());
+            // Erstelle einen Thread für jedes Spiel
+            Thread gameThread = new Thread(() => PlayGame(player1Client, player2Client));
+            gameThread.Start();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Fehler: " + ex.Message);
+        }
+        finally
+        {
+            // Schließe den Listener, wenn er nicht mehr benötigt wird
+            listener.Stop();
+        }
+    }
 
-            foreach (IPAddress i in hostEntry.AddressList)
-            {
-                Console.WriteLine(i);
-            }
+    static void PlayGame(TcpClient player1Client, TcpClient player2Client)
+    {
+        try
+        {
+            // Erhalte die Netzwerkstreams für die Kommunikation mit den Spielern
+            NetworkStream player1Stream = player1Client.GetStream();
+            NetworkStream player2Stream = player2Client.GetStream();
 
-            Console.WriteLine("Listening for messages...");
+            // Sende eine Nachricht an die Spieler, um das Spiel zu starten
+            byte[] startMessage = Encoding.UTF8.GetBytes("START");
+            player1Stream.Write(startMessage, 0, startMessage.Length);
+            player2Stream.Write(startMessage, 0, startMessage.Length);
 
-            Socket serverSock = new Socket(
-                AddressFamily.InterNetwork,
-                SocketType.Stream,
-                ProtocolType.Tcp);
+            // Erstelle ein leeres Spielfeld
+            char[] board = { '-', '-', '-', '-', '-', '-', '-', '-', '-' };
 
-            IPAddress serverIP = IPAddress.Any;
-            IPEndPoint serverEP = new IPEndPoint(serverIP, 11111);
-
-            serverSock.Bind(serverEP);
-            /*try
-
-               serverSock.Bind(serverEP);
-           }
-           catch (System.Net.Sockets.SocketException sockEx)
-           {
-               int errcode = sockEx.ErrorCode;
-               Console.WriteLine(errcode);
-           }*/
-            serverSock.Listen(2);
-
+            // Solange das Spiel läuft
             while (true)
             {
-                if (concounter < 2)
+                // Spieler 1 ist am Zug
+                PerformMove(player1Stream, player2Stream, board, 'X');
+
+                // Überprüfe, ob Spieler 1 gewonnen hat oder das Spiel unentschieden ist
+                if (CheckForWin(board, 'X'))
                 {
-                    Socket connection = serverSock.Accept();
-                    concounter++;
+                    SendWinMessage(player1Stream, player2Stream, "Spieler 1 hat gewonnen!");
+                    break;
+                }
+                else if (CheckForDraw(board))
+                {
+                    SendDrawMessage(player1Stream, player2Stream, "Unentschieden!");
+                    break;
+                }
 
+                // Spieler 2 ist am Zug
+                PerformMove(player2Stream, player1Stream, board, 'O');
 
+                // Überprüfe, ob Spieler 2 gewonnen hat oder das Spiel unentschieden ist
+                if (CheckForWin(board, 'O'))
+                {
+                    SendWinMessage(player1Stream, player2Stream, "Spieler 2 hat gewonnen!");
+                    break;
+                }
+                else if (CheckForDraw(board))
+                {
+                    SendDrawMessage(player1Stream, player2Stream, "Unentschieden!");
+                    break;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Fehler im Spiel: " + ex.Message);
+        }
+        finally
+        {
+            // Schließe die Verbindungen zu den Spielern
+            player1Client.Close();
+            player2Client.Close();
+        }
+    }
 
+    static void PerformMove(NetworkStream currentPlayerStream, NetworkStream otherPlayerStream, char[] board, char symbol)
+    {
+        try
+        {
+            // Sende das aktuelle Spielfeld an den Spieler
+            byte[] boardData = Encoding.UTF8.GetBytes(new string(board));
+            currentPlayerStream.Write(boardData, 0, boardData.Length);
 
-                    // Semaphore übernehmen
-                    semaphore.WaitOne();
-                    if (symbol == "")
-                    {
-                        symbol = "X"; // Erster Client bekommt das Symbol "X"
-                        Byte[] symbolBytes = Encoding.UTF8.GetBytes(symbol);
-                        connection.Send(symbolBytes); // Sende das Symbol "X" an den Client
-                    }
-                    else if (symbol == "X")
-                    {
-                        symbol = "O"; // Zweiter Client bekommt das Symbol "O"
-                        Byte[] symbolBytes = Encoding.UTF8.GetBytes(symbol);
-                        connection.Send(symbolBytes);// Sende das Symbol "O" an den Client
-                    }
+            // Überprüfe, ob die Verbindung noch geöffnet ist
+            if (currentPlayerStream.CanWrite)
+            {
+                // Empfange den Zug des Spielers
+                byte[] moveData = new byte[1];
+                currentPlayerStream.Read(moveData, 0, moveData.Length);
+                char moveChar = Encoding.UTF8.GetChars(moveData)[0]; // Erhalte das Zeichen anstelle der Ganzzahl
 
-                    Byte[] serverBuffer = new Byte[1024];
-                    String message = String.Empty;
-
-                    int bytes = connection.Receive(serverBuffer, serverBuffer.Length, 0);
-
-                    message += Encoding.UTF8.GetString(serverBuffer, 0, bytes);
-
-                    Console.WriteLine(message);
-                    if (message == "close")
-                    {
-                        Byte[] messageByte = Encoding.UTF8.GetBytes(message);
-                        connection.Send(messageByte);
-                        connection.Close();
-
-                    }
-
-
-
-                    // Semaphore freigeben
-                    semaphore.Release();
+                // Überprüfe, ob das empfangene Zeichen eine Ganzzahl darstellt
+                if (char.IsDigit(moveChar))
+                {
+                    // Führe den Zug des Spielers aus
+                    int moveIndex = int.Parse(moveChar.ToString()); // Konvertiere das Zeichen in eine Ganzzahl
+                    board[moveIndex] = symbol;
                 }
                 else
                 {
-
+                    // Sende eine Fehlermeldung an den Spieler
+                    byte[] errorMessage = Encoding.UTF8.GetBytes("ERROR: Ungültiger Zug");
+                    currentPlayerStream.Write(errorMessage, 0, errorMessage.Length);
                 }
-
-
             }
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Fehler beim Ausführen des Zugs: " + ex.Message);
+        }
+    }
+
+
+    static bool CheckForWin(char[] board, char symbol)
+    {
+        // Überprüfe alle möglichen Gewinnkombinationen
+        return (board[0] == symbol && board[1] == symbol && board[2] == symbol) ||
+               (board[3] == symbol && board[4] == symbol && board[5] == symbol) ||
+               (board[6] == symbol && board[7] == symbol && board[8] == symbol) ||
+               (board[0] == symbol && board[3] == symbol && board[6] == symbol) ||
+               (board[1] == symbol && board[4] == symbol && board[7] == symbol) ||
+               (board[2] == symbol && board[5] == symbol && board[8] == symbol) ||
+               (board[0] == symbol && board[4] == symbol && board[8] == symbol) ||
+               (board[2] == symbol && board[4] == symbol && board[6] == symbol);
+    }
+
+    static bool CheckForDraw(char[] board)
+    {
+        // Überprüfe, ob das Spielfeld voll ist (unentschieden)
+        foreach (char cell in board)
+        {
+            if (cell == '-')
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static void SendWinMessage(NetworkStream player1Stream, NetworkStream player2Stream, string message)
+    {
+        // Sende Gewinnnachricht an beide Spieler
+        byte[] winMessage = Encoding.UTF8.GetBytes("WIN:" + message);
+        player1Stream.Write(winMessage, 0, winMessage.Length);
+        player2Stream.Write(winMessage, 0, winMessage.Length);
+    }
+
+    static void SendDrawMessage(NetworkStream player1Stream, NetworkStream player2Stream, string message)
+    {
+        // Sende Unentschiedennachricht an beide Spieler
+        byte[] drawMessage = Encoding.UTF8.GetBytes("DRAW:" + message);
+        player1Stream.Write(drawMessage, 0, drawMessage.Length);
+        player2Stream.Write(drawMessage, 0, drawMessage.Length);
     }
 }
