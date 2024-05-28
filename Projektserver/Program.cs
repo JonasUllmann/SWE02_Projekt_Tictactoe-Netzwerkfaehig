@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -29,10 +30,6 @@ class TicTacToeServer
             // Warte auf Verbindung des ersten Spielers
             TcpClient player1Client = listener.AcceptTcpClient();
             Console.WriteLine("Spieler X verbunden.");
-            string playerName = Encoding.UTF8.GetString(, 0, );
-
-
-
             // Warte auf Verbindung des zweiten Spielers
             TcpClient player2Client = listener.AcceptTcpClient();
             Console.WriteLine("Spieler O verbunden.");
@@ -60,11 +57,27 @@ class TicTacToeServer
             NetworkStream player1Stream = player1Client.GetStream();
             NetworkStream player2Stream = player2Client.GetStream();
 
-            // Sende eine Nachricht an die Spieler, um das Spiel zu starten
+            // Sende eine Nachricht an die Spieler welches Team sie sind 
             byte[] XMessage = Encoding.UTF8.GetBytes("X");
             byte[] OMessage = Encoding.UTF8.GetBytes("O");
             player1Stream.Write(XMessage, 0, XMessage.Length);
             player2Stream.Write(OMessage, 0, OMessage.Length);
+            //Empfangen der Spielernamen
+            // Puffer für eingehende Daten
+            byte[] buffer = new byte[1024];
+
+            // Anzahl der gelesenen Bytes
+            int name1Bytes = player1Stream.Read(buffer, 0, buffer.Length);
+            int name2Bytes = player2Stream.Read(buffer, 0, buffer.Length);
+
+            // Empfangene Daten in einen String umwandeln
+            string player1Name = Encoding.UTF8.GetString(buffer, 0, name1Bytes);
+            string player2Name = Encoding.UTF8.GetString(buffer, 0, name2Bytes);
+            //name dem anderen spieler schicken 
+            byte[] name1Message = Encoding.UTF8.GetBytes(player1Name);
+            byte[] name2Message = Encoding.UTF8.GetBytes(player1Name);
+            player1Stream.Write(name2Message, 0, name2Message.Length);
+            player2Stream.Write(name1Message, 0, name1Message.Length);
 
             // Erstelle ein leeres Spielfeld
             char[] board = { '-', '-', '-', '-', '-', '-', '-', '-', '-' };
