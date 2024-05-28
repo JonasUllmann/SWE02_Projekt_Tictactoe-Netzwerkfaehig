@@ -29,7 +29,7 @@ class TicTacToeServer
             // Warte auf Verbindung des ersten Spielers
             TcpClient player1Client = listener.AcceptTcpClient();
             Console.WriteLine("Spieler X verbunden.");
-            string playerName = Encoding.UTF8.GetString(, 0, );
+            //string playerName = Encoding.UTF8.GetString(, 0, );
 
 
 

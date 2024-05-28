@@ -76,7 +76,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
             //Versucht eine Verbindung aufzubauen
             clientSocket.Connect(serverendpoint);
-            clientSocket.Send(Encoding.UTF8.GetBytes(pname));
+            
 
 
             Byte[] serverBuffer = new Byte[1024];
@@ -85,13 +85,18 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             int bytes = clientSocket.Receive(serverBuffer, serverBuffer.Length, 0);
 
             message += Encoding.UTF8.GetString(serverBuffer, 0, bytes);
-
             Pteam = message;
 
-            if (message != String.Empty)
+            if (message == "X" || message == "O")
             {
                 tbxsuccess.Text = "Connection successful!";
             }
+            else if(message != "X" || message != "O")
+            {
+                tbxsuccess.Text = "Something went wrong with the teamselection!";
+            }
+
+            clientSocket.Send(Encoding.UTF8.GetBytes(pname)); //sendet dem Server seinen Spielernamen
 
             btn_connect.IsEnabled = false;
             cbxplaylocal.IsEnabled = false;
