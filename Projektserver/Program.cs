@@ -85,21 +85,26 @@ class TicTacToeServer
             // Solange das Spiel läuft
             while (true)
             {
-                //buffer für ersten spielzug 
-                byte[] buffer2 = new byte[1024];
-                int move1Bytes = player2Stream.Read(buffer2, 0, buffer2.Length);
-                string move= Encoding.UTF8.GetString(buffer2, 0, move1Bytes);
 
                 // Spieler 1 ist am Zug
-                PerformMove(player1Stream, player2Stream,move , 'X');
-
-                //neuer buffer für anderen Spielzug 
-                byte[] buffer3 = new byte[1024];
-                int move2Bytes = player2Stream.Read(buffer3, 0, buffer3.Length);
-                string move2 = Encoding.UTF8.GetString(buffer3, 0, move2Bytes);
+                PerformMove(player1Stream, player2Stream, 'X');
 
                 // Spieler 2 ist am Zug
-                PerformMove(player2Stream, player1Stream, move2 ,'O');
+                PerformMove(player2Stream, player1Stream ,'O');
+
+                //buffer für die ENd message spielzug 
+                byte[] endmessagebuffer = new byte[1024];
+                int endmessageBytes = player1Stream.Read(endmessagebuffer, 0, endmessagebuffer.Length);
+                string endmessage = Encoding.UTF8.GetString(endmessagebuffer, 0, endmessageBytes);
+                if (endmessage=="End")
+                {
+                    player1Client.Close();
+                    player2Client.Close();
+                }
+                else
+                {
+                    continue;
+                }
 
             }
         }
@@ -107,15 +112,11 @@ class TicTacToeServer
         {
             Console.WriteLine("Fehler im Spiel: " + ex.Message);
         }
-        finally
-        {
-            // Schließe die Verbindungen zu den Spielern
-            player1Client.Close();
-            player2Client.Close();
-        }
+
+       
     }
 
-    static void PerformMove(NetworkStream currentPlayerStream, NetworkStream otherPlayerStream,string move, char symbol)
+    static void PerformMove(NetworkStream currentPlayerStream, NetworkStream otherPlayerStream, char symbol)
     {
         try
         {
@@ -138,6 +139,3 @@ class TicTacToeServer
         }
     }
 }
-
-
-   
