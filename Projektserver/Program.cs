@@ -28,11 +28,14 @@ class TicTacToeServer
 
             // Warte auf Verbindung des ersten Spielers
             TcpClient player1Client = listener.AcceptTcpClient();
-            Console.WriteLine("Spieler 1 verbunden.");
+            Console.WriteLine("Spieler X verbunden.");
+            string playerName = Encoding.UTF8.GetString(, 0, );
+
+
 
             // Warte auf Verbindung des zweiten Spielers
             TcpClient player2Client = listener.AcceptTcpClient();
-            Console.WriteLine("Spieler 2 verbunden.");
+            Console.WriteLine("Spieler O verbunden.");
 
             // Erstelle einen Thread für jedes Spiel
             Thread gameThread = new Thread(() => PlayGame(player1Client, player2Client));
@@ -58,9 +61,10 @@ class TicTacToeServer
             NetworkStream player2Stream = player2Client.GetStream();
 
             // Sende eine Nachricht an die Spieler, um das Spiel zu starten
-            byte[] startMessage = Encoding.UTF8.GetBytes("START");
-            player1Stream.Write(startMessage, 0, startMessage.Length);
-            player2Stream.Write(startMessage, 0, startMessage.Length);
+            byte[] XMessage = Encoding.UTF8.GetBytes("X");
+            byte[] OMessage = Encoding.UTF8.GetBytes("O");
+            player1Stream.Write(XMessage, 0, XMessage.Length);
+            player2Stream.Write(OMessage, 0, OMessage.Length);
 
             // Erstelle ein leeres Spielfeld
             char[] board = { '-', '-', '-', '-', '-', '-', '-', '-', '-' };
