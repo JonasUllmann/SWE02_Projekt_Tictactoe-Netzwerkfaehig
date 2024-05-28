@@ -63,6 +63,7 @@ class TicTacToeServer
             player1Stream.Write(XMessage, 0, XMessage.Length);
             player2Stream.Write(OMessage, 0, OMessage.Length);
             //Empfangen der Spielernamen
+
             // Puffer für eingehende Daten
             byte[] buffer = new byte[1024];
 
@@ -84,6 +85,7 @@ class TicTacToeServer
 
             // Solange das Spiel läuft
             while (true)
+
             {
 
                 // Spieler 1 ist am Zug
@@ -96,10 +98,12 @@ class TicTacToeServer
                 byte[] endmessagebuffer = new byte[1024];
                 int endmessageBytes = player1Stream.Read(endmessagebuffer, 0, endmessagebuffer.Length);
                 string endmessage = Encoding.UTF8.GetString(endmessagebuffer, 0, endmessageBytes);
+
                 if (endmessage=="End")
                 {
                     player1Client.Close();
                     player2Client.Close();
+                    break;
                 }
                 else
                 {
