@@ -75,45 +75,32 @@ class TicTacToeServer
             string player2Name = Encoding.UTF8.GetString(buffer, 0, name2Bytes);
             //name dem anderen spieler schicken 
             byte[] name1Message = Encoding.UTF8.GetBytes(player1Name);
-            byte[] name2Message = Encoding.UTF8.GetBytes(player1Name);
+            byte[] name2Message = Encoding.UTF8.GetBytes(player2Name);
             player1Stream.Write(name2Message, 0, name2Message.Length);
             player2Stream.Write(name1Message, 0, name1Message.Length);
 
-            // Erstelle ein leeres Spielfeld
-            char[] board = { '-', '-', '-', '-', '-', '-', '-', '-', '-' };
+
+
 
             // Solange das Spiel läuft
             while (true)
             {
-                // Spieler 1 ist am Zug
-                PerformMove(player1Stream, player2Stream, board, 'X');
+                //buffer für ersten spielzug 
+                byte[] buffer2 = new byte[1024];
+                int move1Bytes = player2Stream.Read(buffer2, 0, buffer2.Length);
+                string move= Encoding.UTF8.GetString(buffer2, 0, move1Bytes);
 
-                // Überprüfe, ob Spieler 1 gewonnen hat oder das Spiel unentschieden ist
-                if (CheckForWin(board, 'X'))
-                {
-                    SendWinMessage(player1Stream, player2Stream, "Spieler 1 hat gewonnen!");
-                    break;
-                }
-                else if (CheckForDraw(board))
-                {
-                    SendDrawMessage(player1Stream, player2Stream, "Unentschieden!");
-                    break;
-                }
+                // Spieler 1 ist am Zug
+                PerformMove(player1Stream, player2Stream,move , 'X');
+
+                //neuer buffer für anderen Spielzug 
+                byte[] buffer3 = new byte[1024];
+                int move2Bytes = player2Stream.Read(buffer3, 0, buffer3.Length);
+                string move2 = Encoding.UTF8.GetString(buffer3, 0, move2Bytes);
 
                 // Spieler 2 ist am Zug
-                PerformMove(player2Stream, player1Stream, board, 'O');
+                PerformMove(player2Stream, player1Stream, move2 ,'O');
 
-                // Überprüfe, ob Spieler 2 gewonnen hat oder das Spiel unentschieden ist
-                if (CheckForWin(board, 'O'))
-                {
-                    SendWinMessage(player1Stream, player2Stream, "Spieler 2 hat gewonnen!");
-                    break;
-                }
-                else if (CheckForDraw(board))
-                {
-                    SendDrawMessage(player1Stream, player2Stream, "Unentschieden!");
-                    break;
-                }
             }
         }
         catch (Exception ex)
@@ -128,35 +115,21 @@ class TicTacToeServer
         }
     }
 
-    static void PerformMove(NetworkStream currentPlayerStream, NetworkStream otherPlayerStream, char[] board, char symbol)
+    static void PerformMove(NetworkStream currentPlayerStream, NetworkStream otherPlayerStream,string move, char symbol)
     {
         try
         {
-            // Sende das aktuelle Spielfeld an den Spieler
-            byte[] boardData = Encoding.UTF8.GetBytes(new string(board));
-            currentPlayerStream.Write(boardData, 0, boardData.Length);
+            
 
             // Überprüfe, ob die Verbindung noch geöffnet ist
             if (currentPlayerStream.CanWrite)
             {
                 // Empfange den Zug des Spielers
-                byte[] moveData = new byte[1];
+                byte[] moveData = new byte[1024];
                 currentPlayerStream.Read(moveData, 0, moveData.Length);
-                char moveChar = Encoding.UTF8.GetChars(moveData)[0]; // Erhalte das Zeichen anstelle der Ganzzahl
-
-                // Überprüfe, ob das empfangene Zeichen eine Ganzzahl darstellt
-                if (char.IsDigit(moveChar))
-                {
-                    // Führe den Zug des Spielers aus
-                    int moveIndex = int.Parse(moveChar.ToString()); // Konvertiere das Zeichen in eine Ganzzahl
-                    board[moveIndex] = symbol;
-                }
-                else
-                {
-                    // Sende eine Fehlermeldung an den Spieler
-                    byte[] errorMessage = Encoding.UTF8.GetBytes("ERROR: Ungültiger Zug");
-                    currentPlayerStream.Write(errorMessage, 0, errorMessage.Length);
-                }
+                string moveString = Encoding.UTF8.GetString(moveData); // Erhalten der Zeichenkombi
+                otherPlayerStream.Write(moveData, 0, moveData.Length);
+             
             }
         }
         catch (Exception ex)
@@ -164,47 +137,7 @@ class TicTacToeServer
             Console.WriteLine("Fehler beim Ausführen des Zugs: " + ex.Message);
         }
     }
-
-
-    static bool CheckForWin(char[] board, char symbol)
-    {
-        // Überprüfe alle möglichen Gewinnkombinationen
-        return (board[0] == symbol && board[1] == symbol && board[2] == symbol) ||
-               (board[3] == symbol && board[4] == symbol && board[5] == symbol) ||
-               (board[6] == symbol && board[7] == symbol && board[8] == symbol) ||
-               (board[0] == symbol && board[3] == symbol && board[6] == symbol) ||
-               (board[1] == symbol && board[4] == symbol && board[7] == symbol) ||
-               (board[2] == symbol && board[5] == symbol && board[8] == symbol) ||
-               (board[0] == symbol && board[4] == symbol && board[8] == symbol) ||
-               (board[2] == symbol && board[4] == symbol && board[6] == symbol);
-    }
-
-    static bool CheckForDraw(char[] board)
-    {
-        // Überprüfe, ob das Spielfeld voll ist (unentschieden)
-        foreach (char cell in board)
-        {
-            if (cell == '-')
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    static void SendWinMessage(NetworkStream player1Stream, NetworkStream player2Stream, string message)
-    {
-        // Sende Gewinnnachricht an beide Spieler
-        byte[] winMessage = Encoding.UTF8.GetBytes("WIN:" + message);
-        player1Stream.Write(winMessage, 0, winMessage.Length);
-        player2Stream.Write(winMessage, 0, winMessage.Length);
-    }
-
-    static void SendDrawMessage(NetworkStream player1Stream, NetworkStream player2Stream, string message)
-    {
-        // Sende Unentschiedennachricht an beide Spieler
-        byte[] drawMessage = Encoding.UTF8.GetBytes("DRAW:" + message);
-        player1Stream.Write(drawMessage, 0, drawMessage.Length);
-        player2Stream.Write(drawMessage, 0, drawMessage.Length);
-    }
 }
+
+
+   
