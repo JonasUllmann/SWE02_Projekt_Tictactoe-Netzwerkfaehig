@@ -53,73 +53,48 @@ class TicTacToeServer
     {
         try
         {
-            // Erhalte die Netzwerkstreams für die Kommunikation mit den Spielern
             NetworkStream player1Stream = player1Client.GetStream();
             NetworkStream player2Stream = player2Client.GetStream();
 
-            // Sende eine Nachricht an die Spieler welches Team sie sind 
             byte[] XMessage = Encoding.UTF8.GetBytes("X");
             byte[] OMessage = Encoding.UTF8.GetBytes("O");
             player1Stream.Write(XMessage, 0, XMessage.Length);
             player2Stream.Write(OMessage, 0, OMessage.Length);
-            //Empfangen der Spielernamen
 
-            // Puffer für eingehende Daten
             byte[] buffer = new byte[1024];
 
-            // Anzahl der gelesenen Bytes
             int name1Bytes = player1Stream.Read(buffer, 0, buffer.Length);
-            int name2Bytes = player2Stream.Read(buffer, 0, buffer.Length);
-
-            // Empfangene Daten in einen String umwandeln
             string player1Name = Encoding.UTF8.GetString(buffer, 0, name1Bytes);
+
+            int name2Bytes = player2Stream.Read(buffer, 0, buffer.Length);
             string player2Name = Encoding.UTF8.GetString(buffer, 0, name2Bytes);
-            //name dem anderen spieler schicken 
+
             byte[] name1Message = Encoding.UTF8.GetBytes(player1Name);
             byte[] name2Message = Encoding.UTF8.GetBytes(player2Name);
             player1Stream.Write(name2Message, 0, name2Message.Length);
             player2Stream.Write(name1Message, 0, name1Message.Length);
 
-
-
-
-            // Solange das Spiel läuft
             while (true)
-
             {
-
-                // Spieler 1 ist am Zug
                 PerformMove(player1Stream, player2Stream, 'X');
+                PerformMove(player2Stream, player1Stream, 'O');
 
-                // Spieler 2 ist am Zug
-                PerformMove(player2Stream, player1Stream ,'O');
+                byte[] endMessageBuffer = new byte[1024];
+                int endMessageBytes = player1Stream.Read(endMessageBuffer, 0, endMessageBuffer.Length);
+                string endMessage = Encoding.UTF8.GetString(endMessageBuffer, 0, endMessageBytes);
 
-                //buffer für die ENd message spielzug 
-                /*
-                byte[] endmessagebuffer = new byte[1024];
-                int endmessageBytes = player1Stream.Read(endmessagebuffer, 0, endmessagebuffer.Length);
-                string endmessage = Encoding.UTF8.GetString(endmessagebuffer, 0, endmessageBytes);
-                
-
-                if (endmessage=="End")
+                if (endMessage == "End")
                 {
                     player1Client.Close();
                     player2Client.Close();
                     break;
                 }
-                else
-                {
-                    continue;
-                }
-                */
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine("Fehler im Spiel: " + ex.Message);
         }
-
-       
     }
 
     static void PerformMove(NetworkStream currentPlayerStream, NetworkStream otherPlayerStream, char symbol)

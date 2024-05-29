@@ -65,38 +65,29 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
         private void btn_connect_Click(object sender, RoutedEventArgs e)
         {
-            //Überträgt die nötigen Parameter aus den Textboxen in Variablen
             this.Ip = tbxip.Text;
             this.Port = Convert.ToInt32(tbxport.Text);
             this.Pname = tbxname.Text;
 
-            //Erstellt Endpoint und Socket
             serverendpoint = new IPEndPoint(IPAddress.Parse(ip), port);
             clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-            //Versucht eine Verbindung aufzubauen
             clientSocket.Connect(serverendpoint);
-            
-
 
             Byte[] serverBuffer = new Byte[1024];
-            String message = String.Empty;
-
             int bytes = clientSocket.Receive(serverBuffer, serverBuffer.Length, 0);
 
-            message += Encoding.UTF8.GetString(serverBuffer, 0, bytes);
-            Pteam = message;
+            Pteam = Encoding.UTF8.GetString(serverBuffer, 0, bytes);
 
-            if (message == "X" || message == "O")
+            if (Pteam == "X" || Pteam == "O")
             {
                 tbxsuccess.Text = "Connection successful!";
             }
-            else if(message != "X" || message != "O")
+            else
             {
-                tbxsuccess.Text = "Something went wrong with the teamselection!";
+                tbxsuccess.Text = "Something went wrong with the team selection!";
             }
 
-            clientSocket.Send(Encoding.UTF8.GetBytes(pname)); //sendet dem Server seinen Spielernamen
+            clientSocket.Send(Encoding.UTF8.GetBytes(pname));
 
             btn_connect.IsEnabled = false;
             cbxplaylocal.IsEnabled = false;

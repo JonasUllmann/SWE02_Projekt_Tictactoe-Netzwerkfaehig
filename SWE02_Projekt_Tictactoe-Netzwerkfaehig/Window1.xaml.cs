@@ -105,40 +105,34 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
         private void gamestart(object sender, EventArgs e)
         {
-            
             player = new Player(m1.Pteam, 0, m1.Pname);
             player2 = new Player("", 0, "");
 
-            //erwartet Spielernamen des remotespielers vom Server
             Byte[] serverBuffer = new Byte[1024];
             int bytes = m1.ClientSocket.Receive(serverBuffer, serverBuffer.Length, 0);
             player2.Name = Encoding.UTF8.GetString(serverBuffer, 0, bytes);
 
-            //Beschreibt die Spiel-UI und startet den gameloop
-            if (player.Team == "O")
+            Dispatcher.Invoke(() =>
             {
-                player2.Team = "X";
-                tbkwinx.Text = $"{player2.Name}  {player2.Wins}";
-
-                tbkwino.Text = $"{player.Wins}  {player.Name}";
-
-                player2turn();
-                
-            }
-            else if (player.Team == "X")
-            {
-                player2.Team = "O";
-                tbkwino.Text = $"{player2.Wins}  {player2.Name}";
-
-                tbkwinx.Text = $"{player.Name}  {player.Wins}";
-
-            }
+                if (player.Team == "O")
+                {
+                    player2.Team = "X";
+                    tbkwinx.Text = $"{player2.Name}  {player2.Wins}";
+                    tbkwino.Text = $"{player.Wins}  {player.Name}";
+                    player2turn();
+                }
+                else if (player.Team == "X")
+                {
+                    player2.Team = "O";
+                    tbkwino.Text = $"{player2.Wins}  {player2.Name}";
+                    tbkwinx.Text = $"{player.Name}  {player.Wins}";
+                }
+            });
         }
 
         private void gameloop()
         {
             lockbuttons();
-            int isdraw = 0;
             int win = 0;    //erhält die return Werte der Gewinn-funktionen
                             //return 0 -> keiner hat in diesem Zug gewonnen
                             //return 1 -> Rot, also O hat gewonnen
@@ -187,11 +181,6 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
                     player2.Wins++;
                     tbkwinx.Text = $"{player2.Name}  {player2.Wins}";
                 }
-            }
-            else if (isdraw == 9)
-            {
-                lockbuttons();
-                btnnewgame.IsEnabled = true;
             }
 
             if (turn == 0)
@@ -252,34 +241,6 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             gameloop();
         }
 
-        private int checkfordraw()
-        {
-            int isdraw = 0;
-
-            foreach (Button btn in row1)
-            {
-                if (btn.Content != null)
-                {
-                    isdraw++;
-                }
-            }
-            foreach (Button btn in row2)
-            {
-                if (btn.Content != null)
-                {
-                    isdraw++;
-                }
-            }
-            foreach (Button btn in row3)
-            {
-                if (btn.Content != null)
-                {
-                    isdraw++;
-                }
-            }
-
-            return isdraw;
-        }
         private int checkforrowwin()
         {
             //return 0 -> keiner hat in diesem Zug gewonnen
