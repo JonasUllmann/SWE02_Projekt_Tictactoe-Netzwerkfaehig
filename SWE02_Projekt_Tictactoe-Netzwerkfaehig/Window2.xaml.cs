@@ -95,6 +95,34 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
 
 
+        private int checkfordraw()
+        {
+            int isdraw = 0;
+
+            foreach(Button btn in row1)
+            {
+                if(btn.Content != null)
+                {
+                    isdraw++;
+                }
+            }
+            foreach (Button btn in row2)
+            {
+                if (btn.Content != null)
+                {
+                    isdraw++;
+                }
+            }
+            foreach (Button btn in row3)
+            {
+                if (btn.Content != null)
+                {
+                    isdraw++;
+                }
+            }
+
+            return isdraw;
+        }
 
         private int checkforrowwin()
         {
@@ -407,6 +435,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
         private void btnclick(object sender, RoutedEventArgs e) //Funktion löst wenn einer der 9 Hauptbuttons gedrückt wird
         {
+            int isdraw = 0;
             int win = 0;    //erhält die return Werte der Gewinn-funktionen
                             //return 0 -> keiner hat in diesem Zug gewonnen
                             //return 1 -> Rot, also O hat gewonnen
@@ -436,6 +465,8 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             win += checkforcolumnwin();
             win += checkfordiagonalwin();
 
+            isdraw = checkfordraw();
+
             //Rot hat gewonnen
             if (win == 1)
             {
@@ -443,18 +474,22 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
                 btnnewgame.IsEnabled = true; //entsperrt Reset-button
                 winrot++;
                 tbkwino.Text = $"{winrot}    O";
-                MessageBox.Show("Rot hat gewonnen!");
+                //MessageBox.Show("Rot hat gewonnen!");
             }
             //Blau hat gewonnen
-            if (win == 2)
+            else if (win == 2)
             {
                 lockbuttons();
                 btnnewgame.IsEnabled = true; //entsperrt Reset-button
                 winblau++;
                 tbkwinx.Text = $"X    {winblau}";
-                MessageBox.Show("Blau hat gewonnen");
+                //MessageBox.Show("Blau hat gewonnen");
             }
-
+            else if(isdraw == 9)
+            {
+                lockbuttons();
+                btnnewgame.IsEnabled = true;
+            }
         }
 
 

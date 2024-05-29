@@ -95,9 +95,11 @@ class TicTacToeServer
                 PerformMove(player2Stream, player1Stream ,'O');
 
                 //buffer für die ENd message spielzug 
+                /*
                 byte[] endmessagebuffer = new byte[1024];
                 int endmessageBytes = player1Stream.Read(endmessagebuffer, 0, endmessagebuffer.Length);
                 string endmessage = Encoding.UTF8.GetString(endmessagebuffer, 0, endmessageBytes);
+                
 
                 if (endmessage=="End")
                 {
@@ -109,7 +111,7 @@ class TicTacToeServer
                 {
                     continue;
                 }
-
+                */
             }
         }
         catch (Exception ex)

@@ -17,6 +17,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
         private int turn;   //Gíbt an wer als nächstes am Zug ist 0->player, 1->player2
         private int winrot;     //Zählt die Anzahl für gewonnene Runden von Rot
         private int winblau;    //Zählt die Anzahl für gewonnene Runden von Blau
+        private string p2turn;
 
         SolidColorBrush backgroundcolor = (SolidColorBrush)new BrushConverter().ConvertFrom("#FFDDDDDD");   //Standardfarbe der Buttons in XAML, wichtig für richtige Farbe nach Reset
 
@@ -104,7 +105,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
         private void gamestart(object sender, EventArgs e)
         {
-
+            
             player = new Player(m1.Pteam, 0, m1.Pname);
             player2 = new Player("", 0, "");
 
@@ -137,6 +138,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
         private void gameloop()
         {
             lockbuttons();
+            int isdraw = 0;
             int win = 0;    //erhält die return Werte der Gewinn-funktionen
                             //return 0 -> keiner hat in diesem Zug gewonnen
                             //return 1 -> Rot, also O hat gewonnen
@@ -186,6 +188,11 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
                     tbkwinx.Text = $"{player2.Name}  {player2.Wins}";
                 }
             }
+            else if (isdraw == 9)
+            {
+                lockbuttons();
+                btnnewgame.IsEnabled = true;
+            }
 
             if (turn == 0)
             {
@@ -201,11 +208,11 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
         private void player2turn()
         {
             Byte[] serverBuffer = new Byte[1024];
-            string p2turn = "";
+            p2turn = "";
 
             //erwartet string im Format: ("{Reihe}{btn}")
-                                       //a, b oder c stehen für Reihe 1, 2 oder 3
-                                       //0, 1 oder 2 stehen für den Index innerhalb der jeweiligen Liste und somit für die Buttons
+            //a, b oder c stehen für Reihe 1, 2 oder 3
+            //0, 1 oder 2 stehen für den Index innerhalb der jeweiligen Liste und somit für die Buttons
             int bytes = m1.ClientSocket.Receive(serverBuffer, serverBuffer.Length, 0);
             p2turn += Encoding.UTF8.GetString(serverBuffer, 0, bytes);
 
@@ -245,6 +252,34 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             gameloop();
         }
 
+        private int checkfordraw()
+        {
+            int isdraw = 0;
+
+            foreach (Button btn in row1)
+            {
+                if (btn.Content != null)
+                {
+                    isdraw++;
+                }
+            }
+            foreach (Button btn in row2)
+            {
+                if (btn.Content != null)
+                {
+                    isdraw++;
+                }
+            }
+            foreach (Button btn in row3)
+            {
+                if (btn.Content != null)
+                {
+                    isdraw++;
+                }
+            }
+
+            return isdraw;
+        }
         private int checkforrowwin()
         {
             //return 0 -> keiner hat in diesem Zug gewonnen
