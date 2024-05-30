@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -199,45 +200,41 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             Byte[] serverBuffer = new Byte[1024];
             p2turn = "";
 
-            //erwartet string im Format: ("{Reihe}{btn}")
-            //a, b oder c stehen für Reihe 1, 2 oder 3
-            //0, 1 oder 2 stehen für den Index innerhalb der jeweiligen Liste und somit für die Buttons
             int bytes = m1.ClientSocket.Receive(serverBuffer, serverBuffer.Length, 0);
             p2turn += Encoding.UTF8.GetString(serverBuffer, 0, bytes);
+            Trace.WriteLine("Zug von Spieler 2 empfangen: " + p2turn);
 
             if (player2.Team == "X")
             {
                 if (p2turn[0] == 'a')
                 {
-                    blueturn(row1[p2turn[1]]);
+                    blueturn(row1[p2turn[1] - '0']); // Indexkorrektur
                 }
                 else if (p2turn[0] == 'b')
                 {
-                    blueturn(row2[p2turn[1]]);
+                    blueturn(row2[p2turn[1] - '0']); // Indexkorrektur
                 }
                 else if (p2turn[0] == 'c')
                 {
-                    blueturn(row3[p2turn[1]]);
+                    blueturn(row3[p2turn[1] - '0']); // Indexkorrektur
                 }
             }
             else if (player2.Team == "O")
             {
                 if (p2turn[0] == 'a')
                 {
-                    redturn(row1[p2turn[1]]);
+                    redturn(row1[p2turn[1] - '0']); // Indexkorrektur
                 }
                 else if (p2turn[0] == 'b')
                 {
-                    redturn(row2[p2turn[1]]);
+                    redturn(row2[p2turn[1] - '0']); // Indexkorrektur
                 }
                 else if (p2turn[0] == 'c')
                 {
-                    redturn(row3[p2turn[1]]);
+                    redturn(row3[p2turn[1] - '0']); // Indexkorrektur
                 }
             }
-            //player ist als nächstes an der Reihe
             turn = 0;
-            //Rückkehr zur gameloop funktion
             gameloop();
         }
 

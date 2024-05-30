@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -14,27 +13,20 @@ class TicTacToeServer
 
     static void StartServer()
     {
-        // Definiere die IP-Adresse und den Port, auf dem der Server lauschen soll
-        IPAddress ipAddress = IPAddress.Any; // Lauscht auf allen verfügbaren IP-Adressen des Hosts
-        int port = 11111; // Der gleiche Port wie im Clientcode
-
-        // Erstelle einen TCP-Listener
+        IPAddress ipAddress = IPAddress.Any;
+        int port = 11111;
         TcpListener listener = new TcpListener(ipAddress, port);
 
         try
         {
-            // Beginne mit dem Lauschen auf Verbindungen von Clients
             listener.Start();
             Console.WriteLine("Tic Tac Toe Server gestartet. Warte auf Verbindungen...");
 
-            // Warte auf Verbindung des ersten Spielers
             TcpClient player1Client = listener.AcceptTcpClient();
             Console.WriteLine("Spieler X verbunden.");
-            // Warte auf Verbindung des zweiten Spielers
             TcpClient player2Client = listener.AcceptTcpClient();
             Console.WriteLine("Spieler O verbunden.");
 
-            // Erstelle einen Thread für jedes Spiel
             Thread gameThread = new Thread(() => PlayGame(player1Client, player2Client));
             gameThread.Start();
         }
@@ -44,7 +36,6 @@ class TicTacToeServer
         }
         finally
         {
-            // Schließe den Listener, wenn er nicht mehr benötigt wird
             listener.Stop();
         }
     }
@@ -65,9 +56,11 @@ class TicTacToeServer
 
             int name1Bytes = player1Stream.Read(buffer, 0, buffer.Length);
             string player1Name = Encoding.UTF8.GetString(buffer, 0, name1Bytes);
+            Console.WriteLine("Spieler X Name: " + player1Name);
 
             int name2Bytes = player2Stream.Read(buffer, 0, buffer.Length);
             string player2Name = Encoding.UTF8.GetString(buffer, 0, name2Bytes);
+            Console.WriteLine("Spieler O Name: " + player2Name);
 
             byte[] name1Message = Encoding.UTF8.GetBytes(player1Name);
             byte[] name2Message = Encoding.UTF8.GetBytes(player2Name);
@@ -82,6 +75,7 @@ class TicTacToeServer
                 byte[] endMessageBuffer = new byte[1024];
                 int endMessageBytes = player1Stream.Read(endMessageBuffer, 0, endMessageBuffer.Length);
                 string endMessage = Encoding.UTF8.GetString(endMessageBuffer, 0, endMessageBytes);
+                Console.WriteLine("Endnachricht: " + endMessage);
 
                 if (endMessage == "End")
                 {
@@ -101,17 +95,13 @@ class TicTacToeServer
     {
         try
         {
-            
-
-            // Überprüfe, ob die Verbindung noch geöffnet ist
             if (currentPlayerStream.CanWrite)
             {
-                // Empfange den Zug des Spielers
                 byte[] moveData = new byte[1024];
-                currentPlayerStream.Read(moveData, 0, moveData.Length);
-                string moveString = Encoding.UTF8.GetString(moveData); // Erhalten der Zeichenkombi
-                otherPlayerStream.Write(moveData, 0, moveData.Length);
-             
+                int bytesRead = currentPlayerStream.Read(moveData, 0, moveData.Length);
+                string moveString = Encoding.UTF8.GetString(moveData, 0, bytesRead);
+                Console.WriteLine($"{symbol} spielt Zug: {moveString}");
+                otherPlayerStream.Write(moveData, 0, bytesRead);
             }
         }
         catch (Exception ex)
