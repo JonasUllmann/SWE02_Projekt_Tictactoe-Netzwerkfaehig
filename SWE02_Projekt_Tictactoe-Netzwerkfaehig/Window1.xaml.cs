@@ -137,7 +137,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
         private void gameloop()
         {
-            lockbuttons();
+
             int isdraw = 0;
             int win = 0;    //erhält die return Werte der Gewinn-funktionen
                             //return 0 -> keiner hat in diesem Zug gewonnen
@@ -148,6 +148,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             win += checkforrowwin();
             win += checkforcolumnwin();
             win += checkfordiagonalwin();
+            isdraw = checkfordraw();
 
             //Rot hat gewonnen
             if (win == 1)
@@ -188,7 +189,8 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
                     tbkwinx.Text = $"{player2.Name}  {player2.Wins}";
                 }
             }
-            else if (isdraw == 9)
+
+            else if (isdraw == 9 && win != 1 && win != 2)
             {
                 lockbuttons();
                 btnnewgame.IsEnabled = true;
@@ -207,6 +209,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
         private void player2turn()
         {
+            lockbuttons();
             Byte[] serverBuffer = new Byte[1024];
             p2turn = "";
 
@@ -216,34 +219,38 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             int bytes = m1.ClientSocket.Receive(serverBuffer, serverBuffer.Length, 0);
             p2turn += Encoding.UTF8.GetString(serverBuffer, 0, bytes);
 
+
+
+            //index immer -'0' weil ps2turn[1] ist ein char (0,1,2) wessen ascii Wert 48,49,50 -> nicht direkt in Int konvertiert 
+            // -'0' | 0 hat den ascii Wert 48 somit kommt wenn man von einer Zahl 48 abzieht der gewünschte zahlenwert raus
             if (player2.Team == "X")
             {
                 if (p2turn[0] == 'a')
                 {
-                    blueturn(row1[p2turn[1]]);
+                    blueturn(row1[p2turn[1] - '0']);
                 }
                 else if (p2turn[0] == 'b')
                 {
-                    blueturn(row2[p2turn[1]]);
+                    blueturn(row2[p2turn[1] - '0']);
                 }
                 else if (p2turn[0] == 'c')
                 {
-                    blueturn(row3[p2turn[1]]);
+                    blueturn(row3[p2turn[1] - '0']);
                 }
             }
             else if (player2.Team == "O")
             {
                 if (p2turn[0] == 'a')
                 {
-                    redturn(row1[p2turn[1]]);
+                    redturn(row1[p2turn[1] - '0']);
                 }
                 else if (p2turn[0] == 'b')
                 {
-                    redturn(row2[p2turn[1]]);
+                    redturn(row2[p2turn[1] - '0']);
                 }
                 else if (p2turn[0] == 'c')
                 {
-                    redturn(row3[p2turn[1]]);
+                    redturn(row3[p2turn[1] - '0']);
                 }
             }
             //player ist als nächstes an der Reihe
