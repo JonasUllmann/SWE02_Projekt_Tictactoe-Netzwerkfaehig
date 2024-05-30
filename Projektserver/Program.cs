@@ -16,7 +16,7 @@ class TicTacToeServer
     {
         // Definiere die IP-Adresse und den Port, auf dem der Server lauschen soll
         IPAddress ipAddress = IPAddress.Any; // Lauscht auf allen verfügbaren IP-Adressen des Hosts
-        int port = 11111; // Der gleiche Port wie im Clientcode
+        int port = 11111; // Der gleiche Port wie im Client
 
         // Erstelle einen TCP-Listener
         TcpListener listener = new TcpListener(ipAddress, port);
@@ -94,7 +94,7 @@ class TicTacToeServer
                 // Spieler 2 ist am Zug
                 PerformMove(player2Stream, player1Stream ,'O');
 
-                //buffer für die ENd message spielzug 
+                //buffer für die ENd message 
                 /*
                 byte[] endmessagebuffer = new byte[1024];
                 int endmessageBytes = player1Stream.Read(endmessagebuffer, 0, endmessagebuffer.Length);
