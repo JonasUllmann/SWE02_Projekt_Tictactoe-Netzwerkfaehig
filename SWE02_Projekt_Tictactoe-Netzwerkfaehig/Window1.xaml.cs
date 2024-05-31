@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Net.Sockets;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -104,31 +105,29 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
         }
 
 
-        private void gamestart(object sender, EventArgs e)
+        private async void gamestart(object sender, EventArgs e)
         {
             player = new Player(m1.Pteam, 0, m1.Pname);
             player2 = new Player("", 0, "");
 
             Byte[] serverBuffer = new Byte[1024];
-            int bytes = m1.ClientSocket.Receive(serverBuffer, serverBuffer.Length, 0);
+            int bytes = await m1.ClientSocket.ReceiveAsync(new ArraySegment<byte>(serverBuffer), SocketFlags.None);
             player2.Name = Encoding.UTF8.GetString(serverBuffer, 0, bytes);
 
-            Dispatcher.Invoke(() =>
+            if (player.Team == "O")
             {
-                if (player.Team == "O")
-                {
-                    player2.Team = "X";
-                    tbkwinx.Text = $"{player2.Name}  {player2.Wins}";
-                    tbkwino.Text = $"{player.Wins}  {player.Name}";
-                    player2turn();
-                }
-                else if (player.Team == "X")
-                {
-                    player2.Team = "O";
-                    tbkwino.Text = $"{player2.Wins}  {player2.Name}";
-                    tbkwinx.Text = $"{player.Name}  {player.Wins}";
-                }
-            });
+                InitializeComponent();
+                player2.Team = "X";
+                tbkwinx.Text = $"{player2.Name}  {player2.Wins}";
+                tbkwino.Text = $"{player.Wins}  {player.Name}";
+                await player2turn();
+            }
+            else if (player.Team == "X")
+            {
+                player2.Team = "O";
+                tbkwino.Text = $"{player2.Wins}  {player2.Name}";
+                tbkwinx.Text = $"{player.Name}  {player.Wins}";
+            }
         }
 
         private void gameloop()
@@ -195,48 +194,49 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
         }
 
-        private void player2turn()
+        private async Task player2turn()
         {
+            lockbuttons();
             Byte[] serverBuffer = new Byte[1024];
             p2turn = "";
 
-            int bytes = m1.ClientSocket.Receive(serverBuffer, serverBuffer.Length, 0);
+            int bytes = await m1.ClientSocket.ReceiveAsync(new ArraySegment<byte>(serverBuffer), SocketFlags.None);
             p2turn += Encoding.UTF8.GetString(serverBuffer, 0, bytes);
-            Trace.WriteLine("Zug von Spieler 2 empfangen: " + p2turn);
 
             if (player2.Team == "X")
             {
                 if (p2turn[0] == 'a')
                 {
-                    blueturn(row1[p2turn[1] - '0']); // Indexkorrektur
+                    blueturn(row1[p2turn[1] - '0']);
                 }
                 else if (p2turn[0] == 'b')
                 {
-                    blueturn(row2[p2turn[1] - '0']); // Indexkorrektur
+                    blueturn(row2[p2turn[1] - '0']);
                 }
                 else if (p2turn[0] == 'c')
                 {
-                    blueturn(row3[p2turn[1] - '0']); // Indexkorrektur
+                    blueturn(row3[p2turn[1] - '0']);
                 }
             }
             else if (player2.Team == "O")
             {
                 if (p2turn[0] == 'a')
                 {
-                    redturn(row1[p2turn[1] - '0']); // Indexkorrektur
+                    redturn(row1[p2turn[1] - '0']);
                 }
                 else if (p2turn[0] == 'b')
                 {
-                    redturn(row2[p2turn[1] - '0']); // Indexkorrektur
+                    redturn(row2[p2turn[1] - '0']);
                 }
                 else if (p2turn[0] == 'c')
                 {
-                    redturn(row3[p2turn[1] - '0']); // Indexkorrektur
+                    redturn(row3[p2turn[1] - '0']);
                 }
             }
             turn = 0;
             gameloop();
         }
+
 
         private int checkforrowwin()
         {
@@ -601,34 +601,28 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             return btnstring;
         }
 
-        private void btnclick(object sender, RoutedEventArgs e) //Funktion löst wenn einer der 9 Hauptbuttons gedrückt wird
+        private async void btnclick(object sender, RoutedEventArgs e)
         {
-            pressedbutton = (Button)sender; //Funktion wird ausgelöst, egal welcher der 9 Buttons gedrückt wird, gibt an welcher der 9 es war
-            
-            if (pressedbutton.Content == null) //ist der Wert von turn gerade ist Blau an der Reihe
+            pressedbutton = (Button)sender;
+            if (pressedbutton.Content == null)
             {
                 if (player.Team == "X")
                 {
-                    blueturn(pressedbutton); //der gedrückte Button wird in der entsprechenden Farbe markiert und der Content wird geändert
+                    blueturn(pressedbutton);
                     turn++;
-                    tbkturn.Background = new SolidColorBrush(Colors.Red);   //Anzeige wer jetzt an der Reihe ist wird entsprechend geändert
+                    tbkturn.Background = new SolidColorBrush(Colors.Red);
                 }
                 else if (player.Team == "O")
                 {
-                    redturn(pressedbutton); //der gedrückte Button wird in der entsprechenden Farbe markiert und der Content wird geändert
+                    redturn(pressedbutton);
                     turn++;
-                    tbkturn.Background = new SolidColorBrush(Colors.Blue);   //Anzeige wer jetzt an der Reihe ist wird entsprechend geändert
+                    tbkturn.Background = new SolidColorBrush(Colors.Blue);
                 }
             }
 
             string pturn = genbtnstring(pressedbutton.Name);
-
-            //sendet string im Format: ("{Reihe}{btn}")
-            m1.ClientSocket.Send(Encoding.UTF8.GetBytes(pturn));
-
-            //player2 ist als nächstes an der Reihe
+            await m1.ClientSocket.SendAsync(Encoding.UTF8.GetBytes(pturn), SocketFlags.None);
             turn = 1;
-            //Rückkehr zum gameloop
             gameloop();
         }
 

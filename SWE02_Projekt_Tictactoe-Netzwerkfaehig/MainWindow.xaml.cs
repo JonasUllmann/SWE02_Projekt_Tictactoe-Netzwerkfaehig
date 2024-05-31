@@ -55,7 +55,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             }
         }
 
-        private void btn_connect_Click(object sender, RoutedEventArgs e)
+        private async void btn_connect_Click(object sender, RoutedEventArgs e)
         {
             this.Ip = tbxip.Text;
             this.Port = Convert.ToInt32(tbxport.Text);
@@ -64,28 +64,25 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             serverendpoint = new IPEndPoint(IPAddress.Parse(ip), port);
             clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-            clientSocket.Connect(serverendpoint);
+            await clientSocket.ConnectAsync(serverendpoint);
 
             Byte[] serverBuffer = new Byte[1024];
             String message = String.Empty;
 
-            int bytes = clientSocket.Receive(serverBuffer, serverBuffer.Length, 0);
+            int bytes = await clientSocket.ReceiveAsync(new ArraySegment<byte>(serverBuffer), SocketFlags.None);
             message += Encoding.UTF8.GetString(serverBuffer, 0, bytes);
             Pteam = message;
 
             if (message == "X" || message == "O")
             {
                 tbxsuccess.Text = "Connection successful!";
-                Trace.WriteLine("Teamzuweisung: " + message);
             }
-            else
+            else if (message != "X" && message != "O")
             {
-                tbxsuccess.Text = "Something went wrong with the team selection!";
-                Trace.WriteLine("Fehler bei der Teamzuweisung: " + message);
+                tbxsuccess.Text = "Something went wrong with the teamselection!";
             }
 
-            clientSocket.Send(Encoding.UTF8.GetBytes(pname));
-            Trace.WriteLine("Spielername gesendet: " + pname);
+            await clientSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(pname)), SocketFlags.None);
 
             btn_connect.IsEnabled = false;
             cbxplaylocal.IsEnabled = false;
