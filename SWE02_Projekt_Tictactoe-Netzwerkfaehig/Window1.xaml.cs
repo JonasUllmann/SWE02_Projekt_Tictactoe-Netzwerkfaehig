@@ -117,6 +117,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             if (player.Team == "O")
             {
                 InitializeComponent();
+             
                 player2.Team = "X";
                 tbkwinx.Text = $"{player2.Name}  {player2.Wins}";
                 tbkwino.Text = $"{player.Wins}  {player.Name}";

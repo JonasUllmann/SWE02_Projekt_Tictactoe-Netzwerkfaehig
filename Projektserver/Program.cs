@@ -71,23 +71,15 @@ class TicTacToeServer
             {
                 PerformMove(player1Stream, player2Stream, 'X');
                 PerformMove(player2Stream, player1Stream, 'O');
-
-                byte[] endMessageBuffer = new byte[1024];
-                int endMessageBytes = player1Stream.Read(endMessageBuffer, 0, endMessageBuffer.Length);
-                string endMessage = Encoding.UTF8.GetString(endMessageBuffer, 0, endMessageBytes);
-                Console.WriteLine("Endnachricht: " + endMessage);
-
-                if (endMessage == "End")
-                {
-                    player1Client.Close();
-                    player2Client.Close();
-                    break;
-                }
             }
         }
-        catch (Exception ex)
+        catch (Exception ex) { 
+             Console.WriteLine("Fehler im Spiel: " + ex.Message);
+        }
+        finally
         {
-            Console.WriteLine("Fehler im Spiel: " + ex.Message);
+            player1Client.Close();
+            player2Client.Close();
         }
     }
 
@@ -95,14 +87,12 @@ class TicTacToeServer
     {
         try
         {
-            if (currentPlayerStream.CanWrite)
-            {
-                byte[] moveData = new byte[1024];
-                int bytesRead = currentPlayerStream.Read(moveData, 0, moveData.Length);
-                string moveString = Encoding.UTF8.GetString(moveData, 0, bytesRead);
-                Console.WriteLine($"{symbol} spielt Zug: {moveString}");
-                otherPlayerStream.Write(moveData, 0, bytesRead);
-            }
+            byte[] moveData = new byte[1024];
+            int bytesRead = currentPlayerStream.Read(moveData, 0, moveData.Length);
+            if (bytesRead == 0) return;  // Verbindung geschlossen
+            string moveString = Encoding.UTF8.GetString(moveData, 0, bytesRead);
+            Console.WriteLine($"{symbol} spielt Zug: {moveString}");
+            otherPlayerStream.Write(moveData, 0, bytesRead);
         }
         catch (Exception ex)
         {
