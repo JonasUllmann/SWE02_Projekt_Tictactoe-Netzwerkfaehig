@@ -68,12 +68,13 @@ class TicTacToeServer
             byte[] buffer = new byte[1024];
             byte[] readymessage = Encoding.UTF8.GetBytes("ready");
 
+            //Spieler1 "ready" senden und Namen empfangen
             player1Stream.Write(readymessage, 0, readymessage.Length);
             int name1Bytes = player1Stream.Read(buffer, 0, buffer.Length);
             string player1Name = Encoding.UTF8.GetString(buffer, 0, name1Bytes);
             Console.WriteLine($"Received Player1name: {player1Name}");
 
-
+            //Spieler2 "ready" senden und Namen empfangen
             player2Stream.Write(readymessage, 0, readymessage.Length);
             int name2Bytes = player2Stream.Read(buffer, 0, buffer.Length);
             string player2Name = Encoding.UTF8.GetString(buffer, 0, name2Bytes);

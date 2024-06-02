@@ -41,6 +41,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
         protected void onGamestart()
         {
+            //ruft den Start des Spiels im anderen Fenster auf
             gamestart?.Invoke(this, EventArgs.Empty);
         }
 
@@ -48,7 +49,8 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
         {
 
 
-
+            //Ist die Checkbox zum Lokalen spiel angehackt? -> Ja Window2
+                                                         // -> Nein Window1
             if (cbxplaylocal.IsChecked == false)
             {
                 win1.Show();
@@ -70,14 +72,17 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             this.Port = Convert.ToInt32(tbxport.Text);
             this.Pname = tbxname.Text;
 
+            //erstellt den Enpoint des Servers und den Socket
             serverendpoint = new IPEndPoint(IPAddress.Parse(ip), port);
             clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
+            //verbindet sich mit dem Server
             await clientSocket.ConnectAsync(serverendpoint);
 
             Byte[] serverBuffer = new Byte[1024];
             String message = String.Empty;
 
+            //erhält die Teamzuweisung vom Server
             int bytes = await clientSocket.ReceiveAsync(serverBuffer, SocketFlags.None);
             message += Encoding.UTF8.GetString(serverBuffer, 0, bytes);
             Pteam = message;
@@ -91,9 +96,11 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
                 tbxsuccess.Text = "Something went wrong with the teamselection!";
             }
 
+            //erwartet den string "ready" vom Server 
             int bytes2 =  clientSocket.Receive(serverBuffer, SocketFlags.None);
             string readysign = Encoding.UTF8.GetString(serverBuffer, 0, bytes2);
 
+            //ist der Server Bereit schickt der Client ihm seinen Spielernamen
             if (readysign == "ready")
             {
                 await clientSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(pname)), SocketFlags.None);

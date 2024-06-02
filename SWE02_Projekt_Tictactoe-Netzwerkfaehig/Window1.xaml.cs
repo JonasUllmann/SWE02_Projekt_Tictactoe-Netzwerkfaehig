@@ -18,7 +18,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
         private int turn;   //Gíbt an wer als nächstes am Zug ist 0->player, 1->player2
         private int winrot;     //Zählt die Anzahl für gewonnene Runden von Rot
         private int winblau;    //Zählt die Anzahl für gewonnene Runden von Blau
-        private string p2turn;
+        private string p2turn;  //der string mit den Zugdaten der später an den Server gesendet wird
 
         SolidColorBrush backgroundcolor = (SolidColorBrush)new BrushConverter().ConvertFrom("#FFDDDDDD");   //Standardfarbe der Buttons in XAML, wichtig für richtige Farbe nach Reset
 
@@ -268,6 +268,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
                     redturn(row3[p2turn[1] - '0']);
                 }
             }
+            //turn 0 bedeutet der lokale client ist wieder drann 
             turn = 0;
             gameloop();
         }
@@ -726,6 +727,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
             btnnewgame.IsEnabled = false;
 
+            //Ist der Client der blaue Spieler so darf er beginnen ist er Rot wartet er auf den Zug des anderen
             if (player.Team == "X")
             {
                 unlockbuttons();
@@ -752,6 +754,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
     }
 
+    //Klasse um die Variablen der Spieler zu speichern
     public class Player
     {
 
