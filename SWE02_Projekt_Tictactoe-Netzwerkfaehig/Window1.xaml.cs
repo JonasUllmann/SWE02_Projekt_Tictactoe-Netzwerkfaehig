@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net.Sockets;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -103,35 +104,27 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
         }
 
 
-        private void gamestart(object sender, EventArgs e)
+        private async void gamestart(object sender, EventArgs e)
         {
-            
             player = new Player(m1.Pteam, 0, m1.Pname);
             player2 = new Player("", 0, "");
 
-            //erwartet Spielernamen des remotespielers vom Server
             Byte[] serverBuffer = new Byte[1024];
-            int bytes = m1.ClientSocket.Receive(serverBuffer, serverBuffer.Length, 0);
+            int bytes = await m1.ClientSocket.ReceiveAsync(new ArraySegment<byte>(serverBuffer), SocketFlags.None);
             player2.Name = Encoding.UTF8.GetString(serverBuffer, 0, bytes);
 
-            //Beschreibt die Spiel-UI und startet den gameloop
             if (player.Team == "O")
             {
                 player2.Team = "X";
                 tbkwinx.Text = $"{player2.Name}  {player2.Wins}";
-
                 tbkwino.Text = $"{player.Wins}  {player.Name}";
-
-                player2turn();
-                
+                await player2turn();
             }
             else if (player.Team == "X")
             {
                 player2.Team = "O";
                 tbkwino.Text = $"{player2.Wins}  {player2.Name}";
-
                 tbkwinx.Text = $"{player.Name}  {player.Wins}";
-
             }
         }
 
@@ -153,7 +146,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             //Rot hat gewonnen
             if (win == 1)
             {
-                lockbuttons();
+
                 btnnewgame.IsEnabled = true; //entsperrt Reset-button
 
                 //aktualisiert Spiel-UI
@@ -173,7 +166,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             //Blau hat gewonnen
             else if (win == 2)
             {
-                lockbuttons();
+
                 btnnewgame.IsEnabled = true; //entsperrt Reset-button
 
                 //aktualisiert Spiel-UI
@@ -190,13 +183,14 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
                 }
             }
 
-            else if (isdraw == 9 && win != 1 && win != 2)
+            else if (isdraw == 9)
             {
-                lockbuttons();
+
                 btnnewgame.IsEnabled = true;
             }
 
-            if (turn == 0)
+            //turn ist 1, lokaler Spieler ist drann, turn = 2, remote Spieler ist drann
+            else if (turn == 0)
             {
                 unlockbuttons();
             }
@@ -204,27 +198,29 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             {
                 player2turn();
             }
-
+            
         }
 
-        private void player2turn()
+        private async Task player2turn()
         {
             lockbuttons();
             Byte[] serverBuffer = new Byte[1024];
             p2turn = "";
 
-            //erwartet string im Format: ("{Reihe}{btn}")
-            //a, b oder c stehen für Reihe 1, 2 oder 3
-            //0, 1 oder 2 stehen für den Index innerhalb der jeweiligen Liste und somit für die Buttons
-            int bytes = m1.ClientSocket.Receive(serverBuffer, serverBuffer.Length, 0);
+            int bytes = await m1.ClientSocket.ReceiveAsync(new ArraySegment<byte>(serverBuffer), SocketFlags.None);
+
             p2turn += Encoding.UTF8.GetString(serverBuffer, 0, bytes);
 
 
+            /*
+            if (p2turn == "reset")
+            {
+                resetfield();
+            }*/
 
-            //index immer -'0' weil ps2turn[1] ist ein char (0,1,2) wessen ascii Wert 48,49,50 -> nicht direkt in Int konvertiert 
-            // -'0' | 0 hat den ascii Wert 48 somit kommt wenn man von einer Zahl 48 abzieht der gewünschte zahlenwert raus
             if (player2.Team == "X")
             {
+                tbkturn.Background = new SolidColorBrush(Colors.Red);
                 if (p2turn[0] == 'a')
                 {
                     blueturn(row1[p2turn[1] - '0']);
@@ -240,6 +236,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             }
             else if (player2.Team == "O")
             {
+                tbkturn.Background = new SolidColorBrush(Colors.Blue);
                 if (p2turn[0] == 'a')
                 {
                     redturn(row1[p2turn[1] - '0']);
@@ -253,9 +250,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
                     redturn(row3[p2turn[1] - '0']);
                 }
             }
-            //player ist als nächstes an der Reihe
             turn = 0;
-            //Rückkehr zur gameloop funktion
             gameloop();
         }
 
@@ -578,8 +573,6 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             }
         }
 
-
-
         private void redturn(Button pressedbutton)  // Rot ist am Zug
         {
             pressedbutton.Content = "O";    //Content bei Rot immer O
@@ -650,42 +643,38 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             return btnstring;
         }
 
-        private void btnclick(object sender, RoutedEventArgs e) //Funktion löst wenn einer der 9 Hauptbuttons gedrückt wird
+        private async void btnclick(object sender, RoutedEventArgs e)
         {
-            pressedbutton = (Button)sender; //Funktion wird ausgelöst, egal welcher der 9 Buttons gedrückt wird, gibt an welcher der 9 es war
-            
-            if (pressedbutton.Content == null) //ist der Wert von turn gerade ist Blau an der Reihe
+            pressedbutton = (Button)sender;
+            if (pressedbutton.Content == null)
             {
                 if (player.Team == "X")
                 {
-                    blueturn(pressedbutton); //der gedrückte Button wird in der entsprechenden Farbe markiert und der Content wird geändert
-                    turn++;
-                    tbkturn.Background = new SolidColorBrush(Colors.Red);   //Anzeige wer jetzt an der Reihe ist wird entsprechend geändert
+                    blueturn(pressedbutton);
+                    tbkturn.Background = new SolidColorBrush(Colors.Red);
                 }
                 else if (player.Team == "O")
                 {
-                    redturn(pressedbutton); //der gedrückte Button wird in der entsprechenden Farbe markiert und der Content wird geändert
-                    turn++;
-                    tbkturn.Background = new SolidColorBrush(Colors.Blue);   //Anzeige wer jetzt an der Reihe ist wird entsprechend geändert
+                    redturn(pressedbutton);
+                    tbkturn.Background = new SolidColorBrush(Colors.Blue);
                 }
             }
 
             string pturn = genbtnstring(pressedbutton.Name);
-
-            //sendet string im Format: ("{Reihe}{btn}")
-            m1.ClientSocket.Send(Encoding.UTF8.GetBytes(pturn));
-
-            //player2 ist als nächstes an der Reihe
+            await m1.ClientSocket.SendAsync(Encoding.UTF8.GetBytes(pturn), SocketFlags.None);
             turn = 1;
-            //Rückkehr zum gameloop
             gameloop();
         }
 
-
-        private void btnnewgame_Click(object sender, RoutedEventArgs e) //Funktion des Reset Buttons, setzt das spielfeld wieder auf standard zurück
+        private /*async*/ void resetfield()
         {
             tbkturn.Background = new SolidColorBrush(Colors.Blue);  //Farbe der "Wer ist am Zug" Anzeige auf Blau weil Blau beginnt immer
 
+            /*
+            if (btnnewgame.IsEnabled == true)
+            {
+                await m1.ClientSocket.SendAsync(Encoding.UTF8.GetBytes("reset"), SocketFlags.None);
+            }*/
 
             //Alle Buttons werden Reihe für Reihe einzeln wieder auf Standard zurückgesetzt -> Content = null, Background = #FFDDDDDD
             foreach (Button btn in row1)
@@ -704,9 +693,24 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
                 btn.Content = null;
             }
 
-            unlockbuttons();
+
             btnnewgame.IsEnabled = false;
-            turn = 0;   //turn zurück auf null gestellt 
+
+            if (player.Team == "X")
+            {
+                unlockbuttons();
+                turn = 0;
+            }
+            else if (player.Team == "O")
+            {
+                turn = 1;
+            }
+
+        }
+
+        private void btnnewgame_Click(object sender, RoutedEventArgs e) //Funktion des Reset Buttons, setzt das spielfeld wieder auf standard zurück
+        {
+            resetfield();
         }
 
         private void btnclose_Click(object sender, RoutedEventArgs e)

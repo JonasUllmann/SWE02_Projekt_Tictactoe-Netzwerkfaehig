@@ -63,27 +63,21 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             }
         }
 
-        private void btn_connect_Click(object sender, RoutedEventArgs e)
+        private async void btn_connect_Click(object sender, RoutedEventArgs e)
         {
-            //Überträgt die nötigen Parameter aus den Textboxen in Variablen
             this.Ip = tbxip.Text;
             this.Port = Convert.ToInt32(tbxport.Text);
             this.Pname = tbxname.Text;
 
-            //Erstellt Endpoint und Socket
             serverendpoint = new IPEndPoint(IPAddress.Parse(ip), port);
             clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-            //Versucht eine Verbindung aufzubauen
-            clientSocket.Connect(serverendpoint);
-            
-
+            await clientSocket.ConnectAsync(serverendpoint);
 
             Byte[] serverBuffer = new Byte[1024];
             String message = String.Empty;
 
-            int bytes = clientSocket.Receive(serverBuffer, serverBuffer.Length, 0);
-
+            int bytes = await clientSocket.ReceiveAsync(serverBuffer, SocketFlags.None);
             message += Encoding.UTF8.GetString(serverBuffer, 0, bytes);
             Pteam = message;
 
@@ -91,12 +85,20 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             {
                 tbxsuccess.Text = "Connection successful!";
             }
-            else if(message != "X" || message != "O")
+            else if (message != "X" && message != "O")
             {
                 tbxsuccess.Text = "Something went wrong with the teamselection!";
             }
 
-            clientSocket.Send(Encoding.UTF8.GetBytes(pname)); //sendet dem Server seinen Spielernamen
+            int bytes2 =  clientSocket.Receive(serverBuffer, SocketFlags.None);
+            string readysign = Encoding.UTF8.GetString(serverBuffer, 0, bytes2);
+
+            if (readysign == "ready")
+            {
+                await clientSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(pname)), SocketFlags.None);
+            }
+
+            
 
             btn_connect.IsEnabled = false;
             cbxplaylocal.IsEnabled = false;
