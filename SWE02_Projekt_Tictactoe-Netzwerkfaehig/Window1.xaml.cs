@@ -146,7 +146,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             //Rot hat gewonnen
             if (win == 1)
             {
-
+                lockbuttons();
                 btnnewgame.IsEnabled = true; //entsperrt Reset-button
 
                 //aktualisiert Spiel-UI
@@ -166,7 +166,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             //Blau hat gewonnen
             else if (win == 2)
             {
-
+                lockbuttons();
                 btnnewgame.IsEnabled = true; //entsperrt Reset-button
 
                 //aktualisiert Spiel-UI
@@ -185,11 +185,11 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
             else if (isdraw == 9)
             {
-
+                lockbuttons();
                 btnnewgame.IsEnabled = true;
             }
 
-            //turn ist 1, lokaler Spieler ist drann, turn = 2, remote Spieler ist drann
+            //turn ist 0, lokaler Spieler ist drann, turn = 1, remote Spieler ist drann
             else if (turn == 0)
             {
                 unlockbuttons();
@@ -698,12 +698,12 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
             if (player.Team == "X")
             {
-                unlockbuttons();
+                gameloop();
                 turn = 0;
             }
             else if (player.Team == "O")
             {
-                turn = 1;
+                player2turn();
             }
 
         }

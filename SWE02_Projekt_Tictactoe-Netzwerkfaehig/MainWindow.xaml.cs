@@ -65,6 +65,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
         private async void btn_connect_Click(object sender, RoutedEventArgs e)
         {
+            btn_connect.IsEnabled = false;
             this.Ip = tbxip.Text;
             this.Port = Convert.ToInt32(tbxport.Text);
             this.Pname = tbxname.Text;
@@ -100,7 +101,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
             
 
-            btn_connect.IsEnabled = false;
+            
             cbxplaylocal.IsEnabled = false;
             btn_start.IsEnabled = true;
         }
