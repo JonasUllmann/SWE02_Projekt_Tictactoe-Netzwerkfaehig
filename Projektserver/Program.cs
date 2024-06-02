@@ -49,7 +49,7 @@ class TicTacToeServer
         }
     }
 
-    static async void PlayGame(TcpClient player1Client, TcpClient player2Client)
+    static void PlayGame(TcpClient player1Client, TcpClient player2Client)
     {
         try
         {
@@ -69,13 +69,13 @@ class TicTacToeServer
             byte[] readymessage = Encoding.UTF8.GetBytes("ready");
 
             player1Stream.Write(readymessage, 0, readymessage.Length);
-            int name1Bytes = await player1Stream.ReadAsync(buffer, 0, buffer.Length);
+            int name1Bytes = player1Stream.Read(buffer, 0, buffer.Length);
             string player1Name = Encoding.UTF8.GetString(buffer, 0, name1Bytes);
             Console.WriteLine($"Received Player1name: {player1Name}");
 
 
             player2Stream.Write(readymessage, 0, readymessage.Length);
-            int name2Bytes = await player2Stream.ReadAsync(buffer, 0, buffer.Length);
+            int name2Bytes = player2Stream.Read(buffer, 0, buffer.Length);
             string player2Name = Encoding.UTF8.GetString(buffer, 0, name2Bytes);
             Console.WriteLine($"Received Player2name: {player2Name}");
 
