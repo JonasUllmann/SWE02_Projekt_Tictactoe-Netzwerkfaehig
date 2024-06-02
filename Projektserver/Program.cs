@@ -12,7 +12,7 @@ class TicTacToeServer
         StartServer();
     }
 
-    static void StartServer()
+    public static void StartServer()
     {
         // Definiere die IP-Adresse und den Port, auf dem der Server lauschen soll
         IPAddress ipAddress = IPAddress.Any; // Lauscht auf allen verfügbaren IP-Adressen des Hosts

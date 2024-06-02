@@ -106,23 +106,34 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
         private async void gamestart(object sender, EventArgs e)
         {
+            //erstellen der Spielerobjekte
             player = new Player(m1.Pteam, 0, m1.Pname);
             player2 = new Player("", 0, "");
 
             Byte[] serverBuffer = new Byte[1024];
+            
+            //erhalten des Namens vom anderen Spieler
             int bytes = await m1.ClientSocket.ReceiveAsync(new ArraySegment<byte>(serverBuffer), SocketFlags.None);
             player2.Name = Encoding.UTF8.GetString(serverBuffer, 0, bytes);
 
             if (player.Team == "O")
             {
+                //Zuweisung des Teams des 2. Spielers
                 player2.Team = "X";
+
+                //beschreibung der UI
                 tbkwinx.Text = $"{player2.Name}  {player2.Wins}";
                 tbkwino.Text = $"{player.Wins}  {player.Name}";
+                
+                //Blau beginnt immer -> ist der Spieler dieses Clients Rot erwartet er gleich am Anfang einen Zug
                 await player2turn();
             }
             else if (player.Team == "X")
             {
+                //Zuweisung des Teams des 2. Spielers
                 player2.Team = "O";
+                
+                //beschreibung der UI
                 tbkwino.Text = $"{player2.Wins}  {player2.Name}";
                 tbkwinx.Text = $"{player.Name}  {player.Wins}";
             }
@@ -131,7 +142,8 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
         private void gameloop()
         {
 
-            int isdraw = 0;
+            int isdraw = 0; //empfängt die Anzahl der bereits gedrückten Buttons
+
             int win = 0;    //erhält die return Werte der Gewinn-funktionen
                             //return 0 -> keiner hat in diesem Zug gewonnen
                             //return 1 -> Rot, also O hat gewonnen
@@ -183,6 +195,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
                 }
             }
 
+            //Hat keiner gewonnen aber sind alle Buttons schon gedrückt worden gibt es ein Unentschieden
             else if (isdraw == 9)
             {
                 lockbuttons();
@@ -201,14 +214,16 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             
         }
 
+        //Zug des Gegnerischen Spielers
         private async Task player2turn()
         {
             lockbuttons();
+
             Byte[] serverBuffer = new Byte[1024];
             p2turn = "";
 
+            //empfängt den Zug
             int bytes = await m1.ClientSocket.ReceiveAsync(new ArraySegment<byte>(serverBuffer), SocketFlags.None);
-
             p2turn += Encoding.UTF8.GetString(serverBuffer, 0, bytes);
 
 
@@ -218,6 +233,9 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
                 resetfield();
             }*/
 
+
+            //Immer -'0' weil p2turn[1] entweder 0, 1 oder 2 ist und der char-Wert von diesen 48, 49, und 50 ist
+            //subtrahiert man 48 also '0' von diesen chars erhält man den Wert des Integers         
             if (player2.Team == "X")
             {
                 tbkturn.Background = new SolidColorBrush(Colors.Red);
@@ -253,7 +271,8 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
             turn = 0;
             gameloop();
         }
-
+    
+        //überprüft wie viele Buttons beschrieben sind und gibt die Anzahl zurück
         private int checkfordraw()
         {
             int isdraw = 0;
@@ -586,14 +605,19 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
         }
 
         //erstellt string in dem Format wie er ihn dem Server weiterschickt
-        private string genbtnstring(string name)
+        private string genbtnstring(string name) //bekommt den Namen des Buttons mit um seine Position im Spielfeld zu ermitteln
         {
+            
+            //Button namen sind aufgebaut wie folgt: btn{reihe}{position}
+            //die Reihe ist entweder top, mid, oder bot; position: left, mid oder right
+            
             string btnstring = "";
 
             //a, b oder c stehen für Reihe 1, 2 oder 3
             //0, 1 oder 2 stehen für den Index innerhalb der jeweiligen Liste und somit für die Buttons
             
-            
+
+            //top
             if (name[3] == 't')
             {
                 if (name[6] == 'l')
@@ -610,6 +634,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
                 }
 
             }
+            //mid
             else if (name[3] == 'm')
             {
                 if (name[6] == 'l')
@@ -625,6 +650,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
                     btnstring = "b2";
                 }
             }
+            //bottom
             else if (name[3] == 'b')
             {
                 if (name[6] == 'l')
@@ -646,6 +672,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
         private async void btnclick(object sender, RoutedEventArgs e)
         {
             pressedbutton = (Button)sender;
+            
             if (pressedbutton.Content == null)
             {
                 if (player.Team == "X")
@@ -660,7 +687,10 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
                 }
             }
 
+            //generiert einen string welchen der andere Client als Zug auslesen kann
             string pturn = genbtnstring(pressedbutton.Name);
+
+            //sendet den string an den Server
             await m1.ClientSocket.SendAsync(Encoding.UTF8.GetBytes(pturn), SocketFlags.None);
             turn = 1;
             gameloop();
@@ -698,8 +728,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
             if (player.Team == "X")
             {
-                gameloop();
-                turn = 0;
+                unlockbuttons();
             }
             else if (player.Team == "O")
             {
@@ -715,6 +744,7 @@ namespace SWE02_Projekt_Tictactoe_Netzwerkfaehig
 
         private void btnclose_Click(object sender, RoutedEventArgs e)
         {
+            //schließt das Programm
             m1.ClientSocket.Close();
             Environment.Exit(0);
         }
